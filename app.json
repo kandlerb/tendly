@@ -30,7 +30,13 @@
     },
     "plugins": [
       "expo-router",
-      "@stripe/stripe-react-native",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.tendly.app",
+          "enableGooglePay": false
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {
