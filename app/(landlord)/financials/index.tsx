@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { usePropertiesStore } from '../../../store/properties';
 import { formatCents } from '../../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../../lib/theme';
 
 export default function FinancialsScreen() {
+  const router = useRouter();
   const { properties, fetchProperties } = usePropertiesStore();
   const { width } = useWindowDimensions();
 
@@ -56,7 +58,12 @@ export default function FinancialsScreen() {
             const noi = rent - expenses;
 
             return (
-              <View key={p.id} style={[styles.card, isWide && { width: colW }]}>
+              <TouchableOpacity
+                key={p.id}
+                style={[styles.card, isWide && { width: colW }]}
+                onPress={() => router.push(`/(landlord)/properties/${p.id}` as any)}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.cardTitle}>{p.nickname ?? p.address}</Text>
                 <View style={styles.row}>
                   <Text style={styles.rowLabel}>Monthly rent</Text>
@@ -73,7 +80,7 @@ export default function FinancialsScreen() {
                 <View style={styles.divider} />
                 <Text style={styles.hint}>Annual NOI: {formatCents(noi * 12)}</Text>
                 {p.mortgage ? <Text style={styles.hint}>Cap rate requires property value — ask Tend AI</Text> : null}
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>

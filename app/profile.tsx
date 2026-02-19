@@ -49,16 +49,19 @@ export default function ProfileScreen() {
   async function handleSaveName() {
     if (!user) return;
     setSavingName(true);
-    const { error } = await supabase
-      .from('users')
-      .update({ full_name: fullName.trim() })
-      .eq('id', user.id);
-    setSavingName(false);
-    if (error) {
-      showAlert('Error', error.message);
-    } else {
-      setUser({ ...user, full_name: fullName.trim() });
-      showAlert('Saved', 'Display name updated.');
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ full_name: fullName.trim() })
+        .eq('id', user.id);
+      if (error) {
+        showAlert('Error', error.message);
+      } else {
+        setUser({ ...user, full_name: fullName.trim() });
+        showAlert('Saved', 'Display name updated.');
+      }
+    } finally {
+      setSavingName(false);
     }
   }
 
@@ -73,24 +76,26 @@ export default function ProfileScreen() {
       return;
     }
     setSavingPassword(true);
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: currentPassword,
-    });
-    if (signInError) {
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (signInError) {
+        showAlert('Wrong password', 'Current password is incorrect.');
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        showAlert('Error', error.message);
+      } else {
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        showAlert('Done', 'Password updated successfully.');
+      }
+    } finally {
       setSavingPassword(false);
-      showAlert('Wrong password', 'Current password is incorrect.');
-      return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setSavingPassword(false);
-    if (error) {
-      showAlert('Error', error.message);
-    } else {
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      showAlert('Done', 'Password updated successfully.');
     }
   }
 

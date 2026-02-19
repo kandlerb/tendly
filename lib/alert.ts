@@ -2,7 +2,7 @@ import { Platform, Alert } from 'react-native';
 
 export function showAlert(title: string, message?: string): void {
   if (Platform.OS === 'web') {
-    window.alert(message ? `${title}\n\n${message}` : title);
+    setTimeout(() => window.alert(message ? `${title}\n\n${message}` : title), 0);
   } else {
     Alert.alert(title, message);
   }

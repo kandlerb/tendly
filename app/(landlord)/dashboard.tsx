@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/auth';
 import { usePropertiesStore } from '../../store/properties';
 import { useMaintenanceStore } from '../../store/maintenance';
@@ -8,6 +9,7 @@ import { formatCents } from '../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../lib/theme';
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { properties, fetchProperties } = usePropertiesStore();
   const { requests, fetchRequests } = useMaintenanceStore();
@@ -34,26 +36,30 @@ export default function DashboardScreen() {
       </View>
       <ScrollView contentContainerStyle={{ padding: hPad, gap: 8 }}>
         <View style={[styles.row, { gap, marginBottom: 0 }]}>
-          <View style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => router.push('/(landlord)/properties' as any)} activeOpacity={0.7}>
             <Text style={styles.statNum}>{totalUnits}</Text>
             <Text style={styles.statLabel}>Total units</Text>
-          </View>
-          <View style={styles.card}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => router.push('/(landlord)/financials' as any)} activeOpacity={0.7}>
             <Text style={[styles.statNum, { color: colors.brand[600] }]}>{formatCents(monthlyRent)}</Text>
             <Text style={styles.statLabel}>Monthly rent</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.row, { gap }]}>
-          <View style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => router.push('/(landlord)/maintenance' as any)} activeOpacity={0.7}>
             <Text style={styles.statNum}>{openRequests}</Text>
             <Text style={styles.statLabel}>Open requests</Text>
-          </View>
+          </TouchableOpacity>
           {emergencies > 0 && (
-            <View style={[styles.card, { backgroundColor: colors.red[50], borderColor: colors.red[100] }]}>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: colors.red[50], borderColor: colors.red[100] }]}
+              onPress={() => router.push('/(landlord)/maintenance' as any)}
+              activeOpacity={0.7}
+            >
               <Text style={[styles.statNum, { color: colors.red[600] }]}>{emergencies}</Text>
               <Text style={[styles.statLabel, { color: colors.red[500] }]}>Emergencies</Text>
-            </View>
+            </TouchableOpacity>
           )}
         </View>
 
@@ -61,10 +67,15 @@ export default function DashboardScreen() {
 
         <View style={isWide ? [styles.grid, { gap }] : undefined}>
           {properties.map((p) => (
-            <View key={p.id} style={[styles.propCard, isWide && { width: colW }]}>
+            <TouchableOpacity
+              key={p.id}
+              style={[styles.propCard, isWide && { width: colW }]}
+              onPress={() => router.push(`/(landlord)/properties/${p.id}` as any)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.propName}>{p.nickname ?? p.address}</Text>
               <Text style={styles.propSub}>{p.units?.length ?? 0} units</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
