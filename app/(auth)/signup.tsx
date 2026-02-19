@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { KeyboardView } from '../../components/ui/KeyboardView';
+import { showAlert } from '../../lib/alert';
+import { colors, text, radius, shadow, cardBase } from '../../lib/theme';
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
 
   async function handleSignup() {
     if (!fullName || !email || !password) return;
@@ -17,47 +23,49 @@ export default function SignupScreen() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { role: 'landlord', full_name: fullName },
-      },
+      options: { data: { role: 'landlord', full_name: fullName } },
     });
     setLoading(false);
-    if (error) Alert.alert('Signup failed', error.message);
-    else Alert.alert('Check your email', 'Click the confirmation link to activate your account.');
+    if (error) showAlert('Signup failed', error.message);
+    else showAlert('Check your email', 'Click the confirmation link to activate your account.');
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingTop: 100 }}>
-        <Text className="text-3xl font-bold text-gray-900 mb-2">Get started</Text>
-        <Text className="text-gray-500 mb-10">Create your landlord account — free forever for 2 units</Text>
+    <KeyboardView style={[styles.flex, isWide && styles.flexWide]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={isWide ? styles.contentWide : styles.contentNarrow}
+      >
+        <View style={isWide ? styles.card : styles.cardNarrow}>
+          <Text style={styles.title}>Get started</Text>
+          <Text style={styles.subtitle}>Create your landlord account — free forever for 2 units</Text>
 
-        <Input label="Full name" value={fullName} onChangeText={setFullName} placeholder="Jane Smith" />
-        <Input
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholder="you@example.com"
-        />
-        <Input
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholder="8+ characters"
-        />
+          <Input label="Full name" value={fullName} onChangeText={setFullName} placeholder="Jane Smith" />
+          <Input label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="you@example.com" />
+          <Input label="Password" value={password} onChangeText={setPassword} secureTextEntry placeholder="8+ characters" />
 
-        <Button title="Create Account" onPress={handleSignup} loading={loading} />
+          <Button title="Create Account" onPress={handleSignup} loading={loading} />
 
-        <Link href="/(auth)/login" className="text-center mt-6">
-          <Text className="text-brand-600 text-sm">Already have an account? Sign in</Text>
-        </Link>
+          <TouchableOpacity style={styles.linkRow} onPress={() => router.push('/(auth)/login')}>
+            <Text style={styles.link}>Already have an account? <Text style={styles.linkBold}>Sign in</Text></Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex:          { flex: 1, backgroundColor: colors.white },
+  flexWide:      { backgroundColor: colors.gray[50] },
+  scroll:        { flex: 1 },
+  contentNarrow: { paddingTop: 100, paddingHorizontal: 24 },
+  contentWide:   { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 48, paddingHorizontal: 24 },
+  cardNarrow:    {},
+  card:          { ...cardBase, ...shadow.sm, width: 440, padding: 48 },
+  title:         { fontSize: text.heroTitle, fontWeight: '700', color: colors.gray[900], marginBottom: 8 },
+  subtitle:      { fontSize: text.body, color: colors.gray[500], marginBottom: 40 },
+  linkRow:       { alignItems: 'center', marginTop: 24 },
+  link:          { fontSize: text.secondary, color: colors.gray[500] },
+  linkBold:      { color: colors.brand[600], fontWeight: '600' },
+});

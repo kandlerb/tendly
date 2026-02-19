@@ -1,4 +1,5 @@
-import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { colors, radius, text } from '../../lib/theme';
 
 interface Props {
   title: string;
@@ -9,24 +10,28 @@ interface Props {
 }
 
 export function Button({ title, onPress, loading, variant = 'primary', disabled }: Props) {
-  const base = 'rounded-xl py-4 px-6 items-center justify-center';
-  const variants = {
-    primary: 'bg-brand-600',
-    secondary: 'bg-gray-100 border border-gray-200',
-  };
-  const textColor = variant === 'primary' ? 'text-white font-semibold' : 'text-gray-800 font-medium';
-
+  const isPrimary = variant === 'primary';
+  const isInactive = disabled || loading;
   return (
     <TouchableOpacity
-      className={`${base} ${variants[variant]} ${disabled || loading ? 'opacity-50' : ''}`}
-      onPress={onPress}
-      disabled={disabled || loading}
+      style={[styles.base, isPrimary ? styles.primary : styles.secondary, isInactive && styles.disabled]}
+      onPress={isInactive ? undefined : onPress}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? 'white' : '#374151'} />
+        <ActivityIndicator color={isPrimary ? colors.white : colors.gray[800]} />
       ) : (
-        <Text className={textColor}>{title}</Text>
+        <Text style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelSecondary]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  base:          { borderRadius: radius.xl, paddingVertical: 16, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center' },
+  primary:       { backgroundColor: colors.brand[600] },
+  secondary:     { backgroundColor: colors.gray[100], borderWidth: 1, borderColor: colors.gray[200] },
+  disabled:      { opacity: 0.5 },
+  label:         { fontSize: text.body },
+  labelPrimary:  { color: colors.white, fontWeight: '600' },
+  labelSecondary:{ color: colors.gray[800], fontWeight: '500' },
+});

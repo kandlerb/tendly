@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Building2, ChevronRight } from 'lucide-react-native';
 import type { Property } from '../../types';
+import { colors, text, radius, shadow, spacing, cardBase } from '../../lib/theme';
 
 interface Props { property: Property; }
 
@@ -11,21 +12,27 @@ export function PropertyCard({ property }: Props) {
 
   return (
     <TouchableOpacity
-      className="bg-white rounded-2xl p-4 mb-3 flex-row items-center shadow-sm border border-gray-100"
+      style={styles.card}
       onPress={() => router.push(`/(landlord)/properties/${property.id}` as any)}
     >
-      <View className="w-12 h-12 bg-brand-50 rounded-xl items-center justify-center mr-4">
-        <Building2 size={22} color="#16a34a" />
+      <View style={styles.icon}>
+        <Building2 size={22} color={colors.brand[600]} />
       </View>
-      <View className="flex-1">
-        <Text className="font-semibold text-gray-900 text-base">
-          {property.nickname ?? property.address}
-        </Text>
-        <Text className="text-gray-500 text-sm mt-0.5">
-          {property.nickname ? property.address : ''} · {unitCount} {unitCount === 1 ? 'unit' : 'units'}
+      <View style={styles.info}>
+        <Text style={styles.name}>{property.nickname ?? property.address}</Text>
+        <Text style={styles.sub}>
+          {property.nickname ? property.address + ' · ' : ''}{unitCount} {unitCount === 1 ? 'unit' : 'units'}
         </Text>
       </View>
-      <ChevronRight size={18} color="#d1d5db" />
+      <ChevronRight size={18} color={colors.gray[300]} />
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  card: { ...cardBase, ...shadow.sm, padding: spacing.cardPad, flexDirection: 'row', alignItems: 'center' },
+  icon: { width: 48, height: 48, backgroundColor: colors.brand[50], borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  info: { flex: 1 },
+  name: { fontWeight: '600', color: colors.gray[900], fontSize: text.body },
+  sub: { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
+});

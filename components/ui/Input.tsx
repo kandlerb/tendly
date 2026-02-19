@@ -1,4 +1,5 @@
-import { View, Text, TextInput, TextInputProps } from 'react-native';
+import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native';
+import { colors, radius, text } from '../../lib/theme';
 
 interface Props extends TextInputProps {
   label: string;
@@ -7,16 +8,23 @@ interface Props extends TextInputProps {
 
 export function Input({ label, error, ...props }: Props) {
   return (
-    <View className="mb-4">
-      <Text className="text-sm font-medium text-gray-700 mb-1">{label}</Text>
+    <View style={styles.wrapper}>
+      <Text style={styles.label}>{label}</Text>
       <TextInput
-        className={`border rounded-xl px-4 py-3 text-base text-gray-900 bg-white ${
-          error ? 'border-red-400' : 'border-gray-200'
-        }`}
-        placeholderTextColor="#9ca3af"
+        style={[styles.input, error ? styles.inputError : styles.inputNormal]}
+        placeholderTextColor={colors.gray[400]}
         {...props}
       />
-      {error && <Text className="text-red-500 text-xs mt-1">{error}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  wrapper: { marginBottom: 16 },
+  label: { fontSize: text.secondary, fontWeight: '500', color: colors.gray[700], marginBottom: 4 },
+  input: { borderWidth: 1, borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 12, fontSize: text.body, color: colors.gray[900], backgroundColor: colors.white },
+  inputNormal: { borderColor: colors.gray[200] },
+  inputError: { borderColor: colors.red[400] },
+  error: { color: colors.red[500], fontSize: text.caption, marginTop: 4 },
+});
