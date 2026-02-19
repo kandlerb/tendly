@@ -20,11 +20,11 @@ export default function LandlordLayout() {
       }}
     >
       <Tabs.Screen name="dashboard" options={{ title: 'Home', tabBarIcon: ({ color }) => <Home size={22} color={color} /> }} />
-      <Tabs.Screen name="properties" options={{ title: 'Properties', tabBarIcon: ({ color }) => <Building2 size={22} color={color} /> }} />
-      <Tabs.Screen name="maintenance" options={{ title: 'Maintenance', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
-      <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
+      <Tabs.Screen name="properties/index" options={{ title: 'Properties', tabBarIcon: ({ color }) => <Building2 size={22} color={color} /> }} />
+      <Tabs.Screen name="maintenance/index" options={{ title: 'Maintenance', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
+      <Tabs.Screen name="messages/index" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
       <Tabs.Screen name="tend" options={{ title: 'Tend AI', tabBarIcon: ({ color }) => <Bot size={22} color={color} /> }} />
-      <Tabs.Screen name="financials" options={{ href: null }} />
+      <Tabs.Screen name="financials/index" options={{ href: null }} />
 
       {/* Hide sub-routes from tab bar */}
       <Tabs.Screen name="properties/add" options={{ href: null }} />

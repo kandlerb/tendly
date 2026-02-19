@@ -3,6 +3,28 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/auth';
 
+// react-native-web's ScrollView registers a non-passive 'wheel' listener in
+// componentDidMount, which causes a browser performance violation. Patch
+// addEventListener at module-load time (before any ScrollView mounts) to
+// force passive:true on all wheel events. Making the listener passive means
+// the browser no longer has to wait for it before scrolling, eliminating
+// the violation. The only side-effect is that event.preventDefault() inside
+// the handler becomes a no-op — acceptable because native scroll behaviour
+// is what we want on web anyway.
+if (typeof window !== 'undefined') {
+  const _orig = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function (type, listener, options) {
+    if (type === 'wheel' || type === 'mousewheel') {
+      const patched =
+        typeof options === 'object'
+          ? { ...options, passive: true }
+          : { passive: true, capture: options === true };
+      return _orig.call(this, type, listener, patched);
+    }
+    return _orig.call(this, type, listener, options);
+  };
+}
+
 export default function RootLayout() {
   const { session, setSession, fetchUser } = useAuthStore();
   const router = useRouter();
