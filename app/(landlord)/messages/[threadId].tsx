@@ -11,7 +11,7 @@ import { colors, text, radius } from '../../../lib/theme';
 export default function MessageThreadScreen() {
   const { threadId } = useLocalSearchParams<{ threadId: string }>();
   const { user } = useAuthStore();
-  const { messages, fetchMessages, sendMessage, subscribeToMessages } = useMessagesStore();
+  const { messages, fetchMessages, sendMessage, subscribeToMessages, markAsRead } = useMessagesStore();
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
@@ -20,11 +20,15 @@ export default function MessageThreadScreen() {
   useEffect(() => {
     fetchMessages(threadId);
     const unsubscribe = subscribeToMessages(threadId);
+    markAsRead(threadId);
     return unsubscribe;
   }, [threadId]);
 
   useEffect(() => {
-    if (threadMessages.length > 0) listRef.current?.scrollToEnd({ animated: true });
+    if (threadMessages.length > 0) {
+      listRef.current?.scrollToEnd({ animated: true });
+      markAsRead(threadId);
+    }
   }, [threadMessages.length]);
 
   async function handleSend() {

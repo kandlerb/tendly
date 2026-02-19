@@ -8,7 +8,7 @@ import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { threads, loadingThreads, fetchThreads } = useMessagesStore();
+  const { threads, unreadCounts, loadingThreads, fetchThreads } = useMessagesStore();
   const { width } = useWindowDimensions();
 
   useEffect(() => { fetchThreads(); }, []);
@@ -49,6 +49,11 @@ export default function MessagesScreen() {
                 {(item as any).unit?.property?.nickname ?? (item as any).unit?.property?.address} · Unit {(item as any).unit?.unit_number}
               </Text>
             </View>
+            {(unreadCounts[item.id] ?? 0) > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadText}>{unreadCounts[item.id]}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         )}
         ListEmptyComponent={!loadingThreads ? (
@@ -71,7 +76,9 @@ const styles = StyleSheet.create({
   info:     { flex: 1, minWidth: 0 },
   name:     { fontWeight: '600', color: colors.gray[900], fontSize: text.body },
   sub:      { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
-  empty:    { alignItems: 'center', paddingVertical: 64 },
-  emptyMain:{ color: colors.gray[400], fontSize: text.body },
-  emptySub: { color: colors.gray[300], fontSize: text.secondary, marginTop: 4 },
+  empty:       { alignItems: 'center', paddingVertical: 64 },
+  emptyMain:   { color: colors.gray[400], fontSize: text.body },
+  emptySub:    { color: colors.gray[300], fontSize: text.secondary, marginTop: 4 },
+  unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, backgroundColor: colors.brand[600], alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
+  unreadText:  { color: colors.white, fontSize: text.caption, fontWeight: '700' },
 });

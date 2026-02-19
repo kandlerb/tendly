@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { Linking } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/auth';
 
@@ -30,8 +31,44 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const [initialized, setInitialized] = useState(false);
+  // Store a pending invite token if app was opened via deep link before auth
+  const pendingInviteToken = useRef<string | null>(null);
+
+  // Extract invite token from a tendly:// URL
+  function extractInviteToken(url: string | null): string | null {
+    if (!url) return null;
+    try {
+      // tendly://invite?token=XXX  or  tendly://invite/XXX
+      const match = url.match(/[?&/]token=([^&]+)/) ?? url.match(/invite\/([^?&]+)/);
+      return match?.[1] ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   useEffect(() => {
+    // Check if app was opened via a deep link (cold start)
+    Linking.getInitialURL().then((url) => {
+      if (url?.startsWith('tendly://invite')) {
+        pendingInviteToken.current = extractInviteToken(url);
+      }
+    });
+
+    // Listen for deep links while app is already open
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      if (url?.startsWith('tendly://invite')) {
+        const token = extractInviteToken(url);
+        if (token) {
+          // If already authenticated as tenant, go straight to onboarding
+          if (session) {
+            router.push(`/(tenant)/onboarding?token=${token}` as any);
+          } else {
+            pendingInviteToken.current = token;
+          }
+        }
+      }
+    });
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) fetchUser(session.user.id);
@@ -45,7 +82,10 @@ export default function RootLayout() {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      sub.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -60,8 +100,30 @@ export default function RootLayout() {
     if (session && inAuthGroup) {
       // Use DB user role if loaded, fall back to JWT metadata set at signup
       const role = user?.role ?? session.user.user_metadata?.role ?? 'landlord';
+
       if (role === 'tenant') {
-        router.replace('/(tenant)/pay');
+        // If there's a pending invite token, go to onboarding first
+        if (pendingInviteToken.current) {
+          const token = pendingInviteToken.current;
+          pendingInviteToken.current = null;
+          router.replace(`/(tenant)/onboarding?token=${token}` as any);
+          return;
+        }
+        // Check if tenant has an active lease; if not, send to onboarding
+        supabase
+          .from('leases')
+          .select('id')
+          .eq('tenant_id', session.user.id)
+          .eq('status', 'active')
+          .limit(1)
+          .single()
+          .then(({ data: lease }) => {
+            if (!lease) {
+              router.replace('/(tenant)/onboarding' as any);
+            } else {
+              router.replace('/(tenant)/pay');
+            }
+          });
       } else {
         // landlord or admin: respect activeView
         router.replace(activeView === 'tenant' ? '/(tenant)/pay' : '/(landlord)/dashboard');

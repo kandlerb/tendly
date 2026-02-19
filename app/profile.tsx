@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LogOut } from 'lucide-react-native';
+import { LogOut, Plus, Trash2 } from 'lucide-react-native';
 import { useAuthStore } from '../store/auth';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
@@ -16,6 +16,7 @@ import { Input } from '../components/ui/Input';
 import { KeyboardView } from '../components/ui/KeyboardView';
 import { colors, text, radius, shadow, spacing, cardBase } from '../lib/theme';
 import { showAlert } from '../lib/alert';
+import type { VehicleInfo, PetInfo } from '../types';
 
 function getInitials(name: string): string {
   return name
@@ -37,6 +38,33 @@ export default function ProfileScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Tenant profile fields
+  const [phone, setPhone] = useState('');
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyRelation, setEmergencyRelation] = useState('');
+  const [vehicles, setVehicles] = useState<VehicleInfo[]>([]);
+  const [pets, setPets] = useState<PetInfo[]>([]);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    if (user?.role !== 'tenant') return;
+    supabase
+      .from('tenant_profiles')
+      .select('phone, emergency_contact_name, emergency_contact_phone, emergency_contact_relation, vehicles, pets')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        setPhone(data.phone ?? '');
+        setEmergencyName(data.emergency_contact_name ?? '');
+        setEmergencyPhone(data.emergency_contact_phone ?? '');
+        setEmergencyRelation(data.emergency_contact_relation ?? '');
+        setVehicles((data.vehicles as VehicleInfo[]) ?? []);
+        setPets((data.pets as PetInfo[]) ?? []);
+      });
+  }, [user?.id, user?.role]);
 
   // Responsive measurements
   const isWide = width >= 640;
@@ -102,6 +130,50 @@ export default function ProfileScreen() {
   function handleSwitchView(view: 'landlord' | 'tenant') {
     setActiveView(view);
     router.replace(view === 'tenant' ? '/(tenant)/pay' : '/(landlord)/dashboard');
+  }
+
+  async function handleSaveTenantProfile() {
+    if (!user) return;
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase.from('tenant_profiles').upsert({
+        id: user.id,
+        phone: phone.trim() || null,
+        emergency_contact_name: emergencyName.trim() || null,
+        emergency_contact_phone: emergencyPhone.trim() || null,
+        emergency_contact_relation: emergencyRelation.trim() || null,
+        vehicles,
+        pets,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        showAlert('Error', error.message);
+      } else {
+        showAlert('Saved', 'Your profile has been updated.');
+      }
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+
+  function addVehicle() {
+    setVehicles((prev) => [...prev, { make: '', model: '', year: new Date().getFullYear(), plate: '', color: '' }]);
+  }
+  function removeVehicle(i: number) {
+    setVehicles((prev) => prev.filter((_, idx) => idx !== i));
+  }
+  function updateVehicle(i: number, field: keyof VehicleInfo, value: string | number) {
+    setVehicles((prev) => prev.map((v, idx) => idx === i ? { ...v, [field]: value } : v));
+  }
+
+  function addPet() {
+    setPets((prev) => [...prev, { type: '', breed: '', name: '', weight_lbs: 0 }]);
+  }
+  function removePet(i: number) {
+    setPets((prev) => prev.filter((_, idx) => idx !== i));
+  }
+  function updatePet(i: number, field: keyof PetInfo, value: string | number) {
+    setPets((prev) => prev.map((p, idx) => idx === i ? { ...p, [field]: value } : p));
   }
 
   async function handleSignOut() {
@@ -193,6 +265,105 @@ export default function ProfileScreen() {
               />
             </View>
           </View>
+
+          {/* ── Tenant Profile Section ── */}
+          {user.role === 'tenant' && (
+            <View style={styles.stack}>
+              {/* Contact info */}
+              <View style={[styles.card, isWide && { flex: 1 }]}>
+                <Text style={styles.cardTitle}>Contact Info</Text>
+                <Text style={styles.cardDesc}>Visible to your landlord</Text>
+                <Input label="Phone Number" value={phone} onChangeText={setPhone} placeholder="+1 (555) 000-0000" keyboardType="phone-pad" />
+                <Text style={[styles.cardTitle, { marginTop: 4 }]}>Emergency Contact</Text>
+                <Input label="Name" value={emergencyName} onChangeText={setEmergencyName} placeholder="Jane Doe" />
+                <Input label="Phone" value={emergencyPhone} onChangeText={setEmergencyPhone} placeholder="+1 (555) 000-0000" keyboardType="phone-pad" />
+                <Input label="Relationship" value={emergencyRelation} onChangeText={setEmergencyRelation} placeholder="Parent, Spouse, Friend…" />
+              </View>
+
+              {/* Vehicles */}
+              <View style={styles.card}>
+                <View style={styles.sectionRow}>
+                  <Text style={styles.cardTitle}>Vehicles</Text>
+                  <TouchableOpacity style={styles.addRowBtn} onPress={addVehicle}>
+                    <Plus size={14} color={colors.brand[600]} />
+                    <Text style={styles.addRowBtnText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
+                {vehicles.length === 0 && (
+                  <Text style={styles.cardDesc}>No vehicles added</Text>
+                )}
+                {vehicles.map((v, i) => (
+                  <View key={i} style={styles.listItem}>
+                    <View style={styles.listItemHeader}>
+                      <Text style={styles.listItemLabel}>Vehicle {i + 1}</Text>
+                      <TouchableOpacity onPress={() => removeVehicle(i)}>
+                        <Trash2 size={14} color={colors.red[500]} />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.twoCol}>
+                      <View style={styles.halfInput}>
+                        <Input label="Make" value={v.make} onChangeText={(val) => updateVehicle(i, 'make', val)} placeholder="Toyota" />
+                      </View>
+                      <View style={styles.halfInput}>
+                        <Input label="Model" value={v.model} onChangeText={(val) => updateVehicle(i, 'model', val)} placeholder="Camry" />
+                      </View>
+                    </View>
+                    <View style={styles.twoCol}>
+                      <View style={styles.halfInput}>
+                        <Input label="Year" value={String(v.year)} onChangeText={(val) => updateVehicle(i, 'year', parseInt(val) || 0)} placeholder="2020" keyboardType="number-pad" />
+                      </View>
+                      <View style={styles.halfInput}>
+                        <Input label="Color" value={v.color} onChangeText={(val) => updateVehicle(i, 'color', val)} placeholder="Silver" />
+                      </View>
+                    </View>
+                    <Input label="License Plate" value={v.plate} onChangeText={(val) => updateVehicle(i, 'plate', val)} placeholder="ABC-1234" autoCapitalize="characters" />
+                  </View>
+                ))}
+              </View>
+
+              {/* Pets */}
+              <View style={styles.card}>
+                <View style={styles.sectionRow}>
+                  <Text style={styles.cardTitle}>Pets</Text>
+                  <TouchableOpacity style={styles.addRowBtn} onPress={addPet}>
+                    <Plus size={14} color={colors.brand[600]} />
+                    <Text style={styles.addRowBtnText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
+                {pets.length === 0 && (
+                  <Text style={styles.cardDesc}>No pets added</Text>
+                )}
+                {pets.map((p, i) => (
+                  <View key={i} style={styles.listItem}>
+                    <View style={styles.listItemHeader}>
+                      <Text style={styles.listItemLabel}>Pet {i + 1}</Text>
+                      <TouchableOpacity onPress={() => removePet(i)}>
+                        <Trash2 size={14} color={colors.red[500]} />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.twoCol}>
+                      <View style={styles.halfInput}>
+                        <Input label="Type" value={p.type} onChangeText={(val) => updatePet(i, 'type', val)} placeholder="Dog, Cat…" />
+                      </View>
+                      <View style={styles.halfInput}>
+                        <Input label="Name" value={p.name} onChangeText={(val) => updatePet(i, 'name', val)} placeholder="Buddy" />
+                      </View>
+                    </View>
+                    <View style={styles.twoCol}>
+                      <View style={styles.halfInput}>
+                        <Input label="Breed" value={p.breed} onChangeText={(val) => updatePet(i, 'breed', val)} placeholder="Labrador" />
+                      </View>
+                      <View style={styles.halfInput}>
+                        <Input label="Weight (lbs)" value={p.weight_lbs > 0 ? String(p.weight_lbs) : ''} onChangeText={(val) => updatePet(i, 'weight_lbs', parseFloat(val) || 0)} placeholder="65" keyboardType="decimal-pad" />
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <Button title="Save Profile" onPress={handleSaveTenantProfile} loading={savingProfile} />
+            </View>
+          )}
 
           {/* ── Row 2: Admin Controls + Sign Out (or just Sign Out) ── */}
           {user.is_admin ? (
@@ -378,4 +549,14 @@ const styles = StyleSheet.create({
     fontSize: text.secondary,
     color: colors.gray[400],
   },
+
+  // Tenant profile section
+  sectionRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+  addRowBtn:       { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.brand[100], backgroundColor: colors.brand[50] },
+  addRowBtnText:   { fontSize: text.caption, fontWeight: '600', color: colors.brand[600] },
+  listItem:        { borderTopWidth: 1, borderTopColor: colors.gray[100], paddingTop: 12, marginTop: 8, gap: 0 },
+  listItemHeader:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
+  listItemLabel:   { fontSize: text.secondary, fontWeight: '600', color: colors.gray[700] },
+  twoCol:          { flexDirection: 'row', gap: 8 },
+  halfInput:       { flex: 1 },
 });

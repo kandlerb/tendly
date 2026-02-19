@@ -69,15 +69,15 @@ export default function TenantMaintenanceScreen() {
     for (let i = 0; i < photos.length; i++) {
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
       if (Platform.OS === 'web' && photoFiles[i]) {
-        const { data } = await supabase.storage.from('documents').upload(fileName, photoFiles[i]);
+        const { data } = await supabase.storage.from('maintenance-photos').upload(fileName, photoFiles[i]);
         if (data) {
-          const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path);
+          const { data: { publicUrl } } = supabase.storage.from('maintenance-photos').getPublicUrl(data.path);
           photoUrls.push(publicUrl);
         }
       } else {
-        const { data } = await supabase.storage.from('documents').upload(fileName, { uri: photos[i], type: 'image/jpeg' } as any);
+        const { data } = await supabase.storage.from('maintenance-photos').upload(fileName, { uri: photos[i], type: 'image/jpeg' } as any);
         if (data) {
-          const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path);
+          const { data: { publicUrl } } = supabase.storage.from('maintenance-photos').getPublicUrl(data.path);
           photoUrls.push(publicUrl);
         }
       }

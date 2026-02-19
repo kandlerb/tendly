@@ -10,7 +10,7 @@ import { colors, text, radius, shadow, headerBase } from '../../lib/theme';
 
 export default function TenantMessagesScreen() {
   const { user } = useAuthStore();
-  const { messages, fetchMessages, sendMessage, subscribeToMessages } = useMessagesStore();
+  const { messages, fetchMessages, sendMessage, subscribeToMessages, markAsRead } = useMessagesStore();
   const [leaseId, setLeaseId] = useState<string | null>(null);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
@@ -29,6 +29,7 @@ export default function TenantMessagesScreen() {
       if (data) {
         setLeaseId(data.id);
         fetchMessages(data.id);
+        markAsRead(data.id);
         return subscribeToMessages(data.id);
       }
     }
@@ -43,6 +44,7 @@ export default function TenantMessagesScreen() {
   useEffect(() => {
     if (threadMessages.length > 0) {
       listRef.current?.scrollToEnd({ animated: true });
+      if (leaseId) markAsRead(leaseId);
     }
   }, [threadMessages.length]);
 
