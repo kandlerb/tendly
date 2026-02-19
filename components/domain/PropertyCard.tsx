@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Building2, ChevronRight } from 'lucide-react-native';
 import type { Property } from '../../types';
-import { colors, text, radius, shadow } from '../../lib/theme';
+import { colors, text, radius, shadow, spacing, cardBase } from '../../lib/theme';
 
 interface Props { property: Property; }
 
@@ -30,9 +30,9 @@ export function PropertyCard({ property }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: radius['2xl'], padding: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
+  card: { ...cardBase, ...shadow.sm, padding: spacing.cardPad, flexDirection: 'row', alignItems: 'center' },
   icon: { width: 48, height: 48, backgroundColor: colors.brand[50], borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   info: { flex: 1 },
-  name: { fontWeight: '600', color: colors.gray[900], fontSize: text.base },
-  sub: { color: colors.gray[500], fontSize: text.sm, marginTop: 2 },
+  name: { fontWeight: '600', color: colors.gray[900], fontSize: text.body },
+  sub: { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
 });

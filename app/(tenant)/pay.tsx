@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/auth';
 import { formatCents, formatDate } from '../../lib/utils';
 import { Button } from '../../components/ui/Button';
+import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../lib/theme';
 import type { RentPayment } from '../../types';
 
 export default function TenantPayScreen() {
   const { user } = useAuthStore();
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     async function load() {
@@ -35,45 +37,80 @@ export default function TenantPayScreen() {
   }, [user]);
 
   const pending = payments.filter((p) => p.status === 'pending' || p.status === 'late');
+  const isWide = width >= 768;
+  const hPad = isWide ? 24 : 20;
+  const gap = 16;
+  // Tenant has no sidebar, so full viewport width
+  const colW = isWide ? (width - hPad * 2 - gap) / 2 : undefined;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text className="text-2xl font-bold text-gray-900 mb-6">Pay Rent</Text>
-
+    <SafeAreaView style={styles.safe}>
+      <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
+        <Text style={styles.pageTitle}>Pay Rent</Text>
+      </View>
+      <ScrollView contentContainerStyle={{ padding: hPad, gap }}>
         {pending.length > 0 && (
-          <View className="bg-brand-50 rounded-2xl p-5 mb-6 border border-brand-500/20">
-            <Text className="text-sm text-brand-700 font-medium mb-1">Due {formatDate(pending[0].due_date)}</Text>
-            <Text className="text-4xl font-bold text-brand-600 mb-4">{formatCents(pending[0].amount)}</Text>
+          <View style={styles.pendingCard}>
+            <Text style={styles.pendingDue}>Due {formatDate(pending[0].due_date)}</Text>
+            <Text style={styles.pendingAmount}>{formatCents(pending[0].amount)}</Text>
             <Button title="Pay Now" onPress={() => {}} />
           </View>
         )}
 
-        <Text className="text-lg font-semibold text-gray-900 mb-3">Payment history</Text>
-        {payments.map((p) => (
-          <View key={p.id} className="bg-white rounded-xl p-4 mb-2 flex-row justify-between border border-gray-100">
-            <View>
-              <Text className="font-medium text-gray-900">{formatCents(p.amount)}</Text>
-              <Text className="text-gray-500 text-sm">{formatDate(p.due_date)}</Text>
+        <Text style={styles.sectionTitle}>Payment history</Text>
+
+        <View style={isWide ? [styles.grid, { gap }] : undefined}>
+          {payments.map((p) => (
+            <View key={p.id} style={[styles.payRow, isWide && { width: colW }]}>
+              <View>
+                <Text style={styles.payAmount}>{formatCents(p.amount)}</Text>
+                <Text style={styles.payDate}>{formatDate(p.due_date)}</Text>
+              </View>
+              <View style={[
+                styles.badge,
+                p.status === 'paid' ? styles.badgePaid :
+                p.status === 'late' ? styles.badgeLate : styles.badgePending,
+              ]}>
+                <Text style={[
+                  styles.badgeText,
+                  p.status === 'paid' ? styles.badgeTextPaid :
+                  p.status === 'late' ? styles.badgeTextLate : styles.badgeTextPending,
+                ]}>{p.status}</Text>
+              </View>
             </View>
-            <View className={`px-2.5 py-1 rounded-full self-center ${
-              p.status === 'paid' ? 'bg-green-100' :
-              p.status === 'late' ? 'bg-red-100' : 'bg-yellow-100'
-            }`}>
-              <Text className={`text-xs font-medium capitalize ${
-                p.status === 'paid' ? 'text-green-700' :
-                p.status === 'late' ? 'text-red-700' : 'text-yellow-700'
-              }`}>{p.status}</Text>
-            </View>
-          </View>
-        ))}
+          ))}
+        </View>
 
         {!loading && payments.length === 0 && (
-          <View className="items-center py-8">
-            <Text className="text-gray-400">No payment records yet</Text>
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>No payment records yet</Text>
           </View>
         )}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe:            { flex: 1, backgroundColor: colors.gray[50] },
+  pageHeader:      { ...headerBase },
+  pageTitle:       { fontSize: text.pageTitle, fontWeight: '700', color: colors.gray[900] },
+  pendingCard:     { backgroundColor: colors.brand[50], borderRadius: radius['2xl'], padding: 20, borderWidth: 1, borderColor: colors.brand[100], gap: 12 },
+  pendingDue:      { fontSize: text.secondary, color: colors.brand[700], fontWeight: '500' },
+  pendingAmount:   { fontSize: text.display, fontWeight: '700', color: colors.brand[600] },
+  sectionTitle:    { fontSize: text.subheading, fontWeight: '600', color: colors.gray[900] },
+  grid:            { flexDirection: 'row', flexWrap: 'wrap' },
+  payRow:          { ...cardBase, ...shadow.sm, padding: spacing.cardPad, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  payAmount:       { fontWeight: '500', color: colors.gray[900], fontSize: text.body },
+  payDate:         { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
+  badge:           { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  badgePaid:       { backgroundColor: colors.green[100] },
+  badgeLate:       { backgroundColor: colors.red[100] },
+  badgePending:    { backgroundColor: colors.yellow[100] },
+  badgeText:       { fontSize: text.caption, fontWeight: '500', textTransform: 'capitalize' },
+  badgeTextPaid:   { color: colors.green[700] },
+  badgeTextLate:   { color: colors.red[700] },
+  badgeTextPending:{ color: colors.yellow[700] },
+  empty:           { alignItems: 'center', paddingVertical: 32 },
+  emptyText:       { color: colors.gray[400] },
+});

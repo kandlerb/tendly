@@ -9,7 +9,7 @@ import { UrgencyBadge, StatusBadge } from '../../../components/domain/Maintenanc
 import { Button } from '../../../components/ui/Button';
 import { formatDate } from '../../../lib/utils';
 import type { MaintenanceStatus } from '../../../types';
-import { colors, text, radius, shadow } from '../../../lib/theme';
+import { colors, text, radius, shadow, spacing, cardBase } from '../../../lib/theme';
 
 export default function MaintenanceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,13 +92,13 @@ const styles = StyleSheet.create({
   notFoundText: { color: colors.gray[400] },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, gap: 12 },
   backBtn: { padding: 4 },
-  headerTitle: { flex: 1, fontSize: text.xl, fontWeight: '700', color: colors.gray[900] },
+  headerTitle: { flex: 1, fontSize: text.heading, fontWeight: '700', color: colors.gray[900] },
   scroll: { padding: 20 },
-  card: { backgroundColor: colors.white, borderRadius: radius['2xl'], padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
+  card: { ...cardBase, ...shadow.sm, padding: spacing.cardPad, marginBottom: spacing.cardGap },
   badges: { flexDirection: 'row', marginBottom: 16 },
-  description: { color: colors.gray[700], fontSize: text.base, lineHeight: 22 },
+  description: { color: colors.gray[700], fontSize: text.body, lineHeight: 22 },
   divider: { height: 1, backgroundColor: colors.gray[100], marginVertical: 16 },
-  metaLabel: { fontSize: text.xs, color: colors.gray[400], marginBottom: 4 },
-  metaValue: { color: colors.gray[800], fontWeight: '500', fontSize: text.base },
-  metaSub: { color: colors.gray[500], fontSize: text.sm, marginTop: 2 },
+  metaLabel: { fontSize: text.caption, color: colors.gray[400], marginBottom: 4 },
+  metaValue: { color: colors.gray[800], fontWeight: '500', fontSize: text.body },
+  metaSub: { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
 });

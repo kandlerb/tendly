@@ -26,7 +26,7 @@ if (typeof window !== 'undefined') {
 }
 
 export default function RootLayout() {
-  const { session, setSession, fetchUser } = useAuthStore();
+  const { session, user, activeView, setSession, fetchUser } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
   const [initialized, setInitialized] = useState(false);
@@ -51,18 +51,38 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
     const inAuthGroup = segments[0] === '(auth)';
+
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (session && inAuthGroup) {
-      router.replace('/(landlord)/dashboard');
+      return;
     }
-  }, [session, segments, initialized]);
+
+    if (session && inAuthGroup) {
+      // Use DB user role if loaded, fall back to JWT metadata set at signup
+      const role = user?.role ?? session.user.user_metadata?.role ?? 'landlord';
+      if (role === 'tenant') {
+        router.replace('/(tenant)/pay');
+      } else {
+        // landlord or admin: respect activeView
+        router.replace(activeView === 'tenant' ? '/(tenant)/pay' : '/(landlord)/dashboard');
+      }
+    }
+  }, [session, segments, initialized, activeView]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(landlord)" />
       <Stack.Screen name="(tenant)" />
+      <Stack.Screen
+        name="profile"
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          title: 'Profile',
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack>
   );
 }

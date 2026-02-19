@@ -14,7 +14,7 @@ export function StatusBadge({ status }: { status: MaintenanceStatus }) {
 
 const styles = StyleSheet.create({
   badge: { paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999 },
-  label: { fontSize: text.xs, fontWeight: '500' },
+  label: { fontSize: text.caption, fontWeight: '500' },
 });
 
 const urgencyStyles = {

@@ -28,13 +28,25 @@ export const colors = {
 };
 
 export const text = {
-  xs: 12,
-  sm: 14,
-  base: 16,
-  lg: 18,
-  xl: 20,
+  // ── Numeric scale (Tailwind-style, kept for backward compat) ──────────
+  xs:    12,
+  sm:    14,
+  base:  16,
+  lg:    18,
+  xl:    20,
   '2xl': 24,
   '3xl': 30,
+  '4xl': 36,
+  // ── Semantic roles — use these in components ──────────────────────────
+  caption:    12,  // badges, metadata, tiny hints
+  secondary:  14,  // form labels, supporting descriptions, sub-info
+  body:       16,  // primary body copy, card content, inputs, buttons
+  subheading: 18,  // section headers within a page, emphasized values
+  heading:    20,  // modal/detail screen headers, sidebar brand
+  pageTitle:  24,  // top-level screen title
+  statNum:    30,  // large dashboard statistics
+  heroTitle:  30,  // large heading on auth/landing screens ("Welcome back")
+  display:    36,  // hero display numbers (e.g. pending payment amount)
 };
 
 export const radius = {
@@ -42,6 +54,34 @@ export const radius = {
   lg: 12,
   xl: 16,
   '2xl': 20,
+};
+
+// Spacing scale — use these instead of hardcoded numbers
+export const spacing = {
+  pagePad:      20,  // horizontal page padding (mobile)
+  pagePadWide:  24,  // horizontal page padding (desktop)
+  cardPad:      20,  // padding inside every content card
+  cardGap:      16,  // gap / marginBottom between cards
+  cardInnerGap: 12,  // gap between elements within a card
+} as const;
+
+// Base page header — spread into every screen's header StyleSheet definition
+// Apply paddingHorizontal inline (it's responsive: hPad = isWide ? 24 : 20)
+export const headerBase = {
+  backgroundColor: '#ffffff',
+  borderBottomWidth: 1,
+  borderBottomColor: '#f3f4f6',  // colors.gray[100]
+  paddingTop:    20,
+  paddingBottom: 16,
+};
+
+// Base card appearance — spread into every StyleSheet card definition
+// alongside ...shadow.sm and any layout overrides (flex, flexDirection, etc.)
+export const cardBase = {
+  backgroundColor: '#ffffff',   // colors.white (avoid circular ref)
+  borderRadius:    20,           // radius['2xl']
+  borderWidth:     1,
+  borderColor:     '#f3f4f6',   // colors.gray[100]
 };
 
 export const shadow = {

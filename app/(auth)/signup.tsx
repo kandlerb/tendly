@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { KeyboardView } from '../../components/ui/KeyboardView';
 import { showAlert } from '../../lib/alert';
-import { colors, text, radius, shadow } from '../../lib/theme';
+import { colors, text, radius, shadow, cardBase } from '../../lib/theme';
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState('');
@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
   contentNarrow: { paddingTop: 100, paddingHorizontal: 24 },
   contentWide:   { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 48, paddingHorizontal: 24 },
   cardNarrow:    {},
-  card:          { width: 440, backgroundColor: colors.white, borderRadius: radius['2xl'], padding: 48, borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
-  title:         { fontSize: text['3xl'], fontWeight: '700', color: colors.gray[900], marginBottom: 8 },
-  subtitle:      { fontSize: text.base, color: colors.gray[500], marginBottom: 40 },
+  card:          { ...cardBase, ...shadow.sm, width: 440, padding: 48 },
+  title:         { fontSize: text.heroTitle, fontWeight: '700', color: colors.gray[900], marginBottom: 8 },
+  subtitle:      { fontSize: text.body, color: colors.gray[500], marginBottom: 40 },
   linkRow:       { alignItems: 'center', marginTop: 24 },
-  link:          { fontSize: text.sm, color: colors.gray[500] },
+  link:          { fontSize: text.secondary, color: colors.gray[500] },
   linkBold:      { color: colors.brand[600], fontWeight: '600' },
 });

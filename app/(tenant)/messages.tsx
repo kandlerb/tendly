@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { KeyboardView } from '../../components/ui/KeyboardView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { useMessagesStore } from '../../store/messages';
 import { useAuthStore } from '../../store/auth';
+import { colors, text, radius, shadow, headerBase } from '../../lib/theme';
 
 export default function TenantMessagesScreen() {
   const { user } = useAuthStore();
@@ -14,6 +15,8 @@ export default function TenantMessagesScreen() {
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
 
   useEffect(() => {
     async function loadLease() {
@@ -53,51 +56,75 @@ export default function TenantMessagesScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-100">
-        <Text className="text-xl font-bold text-gray-900">Messages</Text>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Messages</Text>
       </View>
 
-      <KeyboardView style={{ flex: 1 }}>
-        <FlatList
-          ref={listRef}
-          data={threadMessages}
-          keyExtractor={(m) => m.id}
-          contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={
-            <View className="items-center py-16">
-              <Text className="text-gray-400">No messages yet</Text>
-            </View>
-          }
-          renderItem={({ item }) => {
-            const isMe = item.sender_id === user?.id;
-            return (
-              <View className={`mb-3 max-w-xs ${isMe ? 'self-end' : 'self-start'}`}>
-                <View className={`px-4 py-3 rounded-2xl ${isMe ? 'bg-brand-600' : 'bg-white border border-gray-100'}`}>
-                  <Text className={isMe ? 'text-white' : 'text-gray-900'}>{item.body}</Text>
-                </View>
+      <KeyboardView style={styles.flex}>
+        <View style={isWide ? styles.chatContainerWide : styles.flex}>
+          <FlatList
+            ref={listRef}
+            data={threadMessages}
+            keyExtractor={(m) => m.id}
+            contentContainerStyle={styles.messageList}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={styles.emptyText}>No messages yet</Text>
               </View>
-            );
-          }}
-        />
-
-        <View className="px-4 pb-4 flex-row items-end gap-2">
-          <TextInput
-            className="flex-1 bg-white border border-gray-200 rounded-2xl px-4 py-3 text-base max-h-32"
-            placeholder="Message your landlord..."
-            value={body}
-            onChangeText={setBody}
-            multiline
+            }
+            renderItem={({ item }) => {
+              const isMe = item.sender_id === user?.id;
+              return (
+                <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+                  <View style={[styles.bubbleInner, isMe ? styles.bubbleInnerMe : styles.bubbleInnerThem]}>
+                    <Text style={isMe ? styles.bubbleTextMe : styles.bubbleTextThem}>{item.body}</Text>
+                  </View>
+                </View>
+              );
+            }}
           />
-          <TouchableOpacity
-            className="bg-brand-600 w-11 h-11 rounded-xl items-center justify-center"
-            onPress={handleSend}
-            disabled={sending || !body.trim()}
-          >
-            <Send size={18} color="white" />
-          </TouchableOpacity>
+
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Message your landlord..."
+              value={body}
+              onChangeText={setBody}
+              multiline
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, (!body.trim() || sending) && styles.sendBtnDisabled]}
+              onPress={handleSend}
+            >
+              <Send size={18} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe:               { flex: 1, backgroundColor: colors.gray[50] },
+  flex:               { flex: 1 },
+  header:             { ...headerBase, paddingHorizontal: 20 },
+  headerTitle:        { fontSize: text.pageTitle, fontWeight: '700', color: colors.gray[900] },
+  chatContainerWide:  { flex: 1, maxWidth: 800, alignSelf: 'center', width: '100%' },
+  messageList:        { padding: 16, gap: 8 },
+  empty:              { alignItems: 'center', paddingVertical: 64 },
+  emptyText:          { color: colors.gray[400] },
+  bubble:             { maxWidth: '75%' },
+  bubbleMe:           { alignSelf: 'flex-end' },
+  bubbleThem:         { alignSelf: 'flex-start' },
+  bubbleInner:        { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius['2xl'] },
+  bubbleInnerMe:      { backgroundColor: colors.brand[600] },
+  bubbleInnerThem:    { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
+  bubbleTextMe:       { color: colors.white, fontSize: text.body },
+  bubbleTextThem:     { color: colors.gray[900], fontSize: text.body },
+  inputRow:           { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 16, paddingBottom: 16, paddingTop: 8 },
+  input:              { flex: 1, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[200], borderRadius: radius['2xl'], paddingHorizontal: 16, paddingVertical: 12, fontSize: text.body, maxHeight: 128 },
+  sendBtn:            { backgroundColor: colors.brand[600], width: 44, height: 44, borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  sendBtnDisabled:    { opacity: 0.5 },
+});

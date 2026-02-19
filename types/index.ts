@@ -13,6 +13,7 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
+  is_admin: boolean;
   full_name: string;
   stripe_customer_id: string | null;
   created_at: string;

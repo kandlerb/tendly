@@ -1,14 +1,23 @@
-import { useWindowDimensions } from 'react-native';
-import { Tabs } from 'expo-router';
-import { Home, Building2, Wrench, MessageSquare, Bot } from 'lucide-react-native';
+import { useWindowDimensions, TouchableOpacity } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { Home, Building2, Wrench, MessageSquare, Bot, User } from 'lucide-react-native';
 import { SidebarLayout } from '../../components/ui/SidebarLayout';
 
 const DESKTOP_BREAKPOINT = 768;
 
+const LANDLORD_NAV_ITEMS = [
+  { label: 'Dashboard',   icon: Home,          route: '/(landlord)/dashboard',   segment: 'dashboard' },
+  { label: 'Properties',  icon: Building2,     route: '/(landlord)/properties',  segment: 'properties' },
+  { label: 'Maintenance', icon: Wrench,        route: '/(landlord)/maintenance', segment: 'maintenance' },
+  { label: 'Messages',    icon: MessageSquare, route: '/(landlord)/messages',    segment: 'messages' },
+  { label: 'Tend AI',     icon: Bot,           route: '/(landlord)/tend',        segment: 'tend' },
+] as const;
+
 export default function LandlordLayout() {
   const { width } = useWindowDimensions();
+  const router = useRouter();
 
-  if (width >= DESKTOP_BREAKPOINT) return <SidebarLayout />;
+  if (width >= DESKTOP_BREAKPOINT) return <SidebarLayout navItems={LANDLORD_NAV_ITEMS} />;
 
   return (
     <Tabs
@@ -31,6 +40,23 @@ export default function LandlordLayout() {
       <Tabs.Screen name="properties/[id]/index" options={{ href: null }} />
       <Tabs.Screen name="maintenance/[id]" options={{ href: null }} />
       <Tabs.Screen name="messages/[threadId]" options={{ href: null }} />
+
+      {/* Profile tab — intercepts tap and opens the /profile modal */}
+      <Tabs.Screen
+        name="profile-redirect"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <User size={22} color={color} />,
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              style={props.style as any}
+              onPress={() => router.push('/profile')}
+            >
+              {props.children}
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Tabs>
   );
 }

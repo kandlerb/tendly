@@ -6,7 +6,7 @@ import { ArrowLeft, Building2, Trash2 } from 'lucide-react-native';
 import { usePropertiesStore } from '../../../../store/properties';
 import { formatCents } from '../../../../lib/utils';
 import { showAlert, showConfirm } from '../../../../lib/alert';
-import { colors, text, radius, shadow } from '../../../../lib/theme';
+import { colors, text, radius, shadow, spacing, cardBase } from '../../../../lib/theme';
 
 export default function PropertyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -149,23 +149,23 @@ const styles = StyleSheet.create({
   notFoundText:  { color: colors.gray[400] },
   header:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, gap: 12 },
   backBtn:       { padding: 4 },
-  headerTitle:   { flex: 1, fontSize: text.xl, fontWeight: '700', color: colors.gray[900] },
+  headerTitle:   { flex: 1, fontSize: text.heading, fontWeight: '700', color: colors.gray[900] },
   scroll:        { padding: 20, paddingBottom: 40 },
-  card:          { backgroundColor: colors.white, borderRadius: radius['2xl'], padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
+  card:          { ...cardBase, ...shadow.sm, padding: spacing.cardPad, marginBottom: spacing.cardGap },
   iconRow:       { flexDirection: 'row', alignItems: 'center', gap: 16 },
   iconBox:       { width: 48, height: 48, backgroundColor: colors.brand[50], borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center' },
-  cardTitle:     { fontWeight: '600', color: colors.gray[900], fontSize: text.base },
-  cardSub:       { color: colors.gray[500], fontSize: text.sm, marginTop: 2 },
-  sectionLabel:  { fontWeight: '600', color: colors.gray[700], fontSize: text.sm, marginBottom: 14 },
+  cardTitle:     { fontWeight: '600', color: colors.gray[900], fontSize: text.body },
+  cardSub:       { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
+  sectionLabel:  { fontWeight: '600', color: colors.gray[700], fontSize: text.secondary, marginBottom: 14 },
   row:           { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  rowLabel:      { color: colors.gray[500], fontSize: text.base },
-  rowValue:      { fontWeight: '500', color: colors.gray[900], fontSize: text.base },
+  rowLabel:      { color: colors.gray[500], fontSize: text.body },
+  rowValue:      { fontWeight: '500', color: colors.gray[900], fontSize: text.body },
   divider:       { height: 1, backgroundColor: colors.gray[100], marginVertical: 10 },
-  sectionHeader: { fontSize: text.base, fontWeight: '600', color: colors.gray[700], marginBottom: 12 },
-  unitCard:      { backgroundColor: colors.white, borderRadius: radius.xl, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
-  unitNumber:    { fontWeight: '600', color: colors.gray[900], fontSize: text.base },
-  unitDetail:    { color: colors.gray[500], fontSize: text.sm, marginTop: 2 },
-  unitRent:      { fontWeight: '600', color: colors.brand[600], fontSize: text.base },
+  sectionHeader: { fontSize: text.body, fontWeight: '600', color: colors.gray[700], marginBottom: 12 },
+  unitCard:      { ...cardBase, ...shadow.sm, padding: spacing.cardPad, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+  unitNumber:    { fontWeight: '600', color: colors.gray[900], fontSize: text.body },
+  unitDetail:    { color: colors.gray[500], fontSize: text.secondary, marginTop: 2 },
+  unitRent:      { fontWeight: '600', color: colors.brand[600], fontSize: text.body },
   deleteBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24, paddingVertical: 14, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.red[100], backgroundColor: colors.red[50] },
-  deleteBtnText: { color: colors.red[600], fontWeight: '600', fontSize: text.base },
+  deleteBtnText: { color: colors.red[600], fontWeight: '600', fontSize: text.body },
 });

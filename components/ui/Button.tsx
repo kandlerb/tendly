@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   primary:       { backgroundColor: colors.brand[600] },
   secondary:     { backgroundColor: colors.gray[100], borderWidth: 1, borderColor: colors.gray[200] },
   disabled:      { opacity: 0.5 },
-  label:         { fontSize: text.base },
+  label:         { fontSize: text.body },
   labelPrimary:  { color: colors.white, fontWeight: '600' },
   labelSecondary:{ color: colors.gray[800], fontWeight: '500' },
 });

@@ -22,9 +22,9 @@ export function Input({ label, error, ...props }: Props) {
 
 const styles = StyleSheet.create({
   wrapper: { marginBottom: 16 },
-  label: { fontSize: text.sm, fontWeight: '500', color: colors.gray[700], marginBottom: 4 },
-  input: { borderWidth: 1, borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 12, fontSize: text.base, color: colors.gray[900], backgroundColor: colors.white },
+  label: { fontSize: text.secondary, fontWeight: '500', color: colors.gray[700], marginBottom: 4 },
+  input: { borderWidth: 1, borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 12, fontSize: text.body, color: colors.gray[900], backgroundColor: colors.white },
   inputNormal: { borderColor: colors.gray[200] },
   inputError: { borderColor: colors.red[400] },
-  error: { color: colors.red[500], fontSize: text.xs, marginTop: 4 },
+  error: { color: colors.red[500], fontSize: text.caption, marginTop: 4 },
 });

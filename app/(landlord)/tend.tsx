@@ -6,7 +6,7 @@ import { Send } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { usePropertiesStore } from '../../store/properties';
 import { useAuthStore } from '../../store/auth';
-import { colors, text, radius } from '../../lib/theme';
+import { colors, text, radius, headerBase } from '../../lib/theme';
 
 interface ChatMessage { role: 'user' | 'assistant'; content: string; }
 
@@ -75,9 +75,9 @@ export default function TendScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.gray[50] },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.gray[100], backgroundColor: colors.white },
-  headerTitle: { fontSize: text.xl, fontWeight: '700', color: colors.gray[900] },
-  headerSub: { fontSize: text.xs, color: colors.gray[400], marginTop: 2 },
+  header: { ...headerBase, paddingHorizontal: 20 },
+  headerTitle: { fontSize: text.pageTitle, fontWeight: '700', color: colors.gray[900] },
+  headerSub: { fontSize: text.caption, color: colors.gray[400], marginTop: 2 },
   flex: { flex: 1 },
   bubble: { marginBottom: 16, maxWidth: 300 },
   bubbleMe: { alignSelf: 'flex-end' },
@@ -85,9 +85,9 @@ const styles = StyleSheet.create({
   bubbleInner: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius['2xl'] },
   bubbleInnerMe: { backgroundColor: colors.brand[600] },
   bubbleInnerThem: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[100] },
-  textMe: { color: colors.white, fontSize: text.base },
-  textThem: { color: colors.gray[800], fontSize: text.base },
+  textMe: { color: colors.white, fontSize: text.body },
+  textThem: { color: colors.gray[800], fontSize: text.body },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
-  input: { flex: 1, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[200], borderRadius: radius['2xl'], paddingHorizontal: 16, paddingVertical: 12, fontSize: text.base, maxHeight: 128 },
+  input: { flex: 1, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[200], borderRadius: radius['2xl'], paddingHorizontal: 16, paddingVertical: 12, fontSize: text.body, maxHeight: 128 },
   sendBtn: { backgroundColor: colors.brand[600], width: 44, height: 44, borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center' },
 });
