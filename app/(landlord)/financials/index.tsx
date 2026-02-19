@@ -1,76 +1,68 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePropertiesStore } from '../../../store/properties';
 import { formatCents } from '../../../lib/utils';
+import { colors, text, radius, shadow } from '../../../lib/theme';
 
 export default function FinancialsScreen() {
   const { properties, fetchProperties } = usePropertiesStore();
 
   useEffect(() => { fetchProperties(); }, []);
 
-  const totalMonthlyRent = properties.reduce((sum, p) =>
-    sum + (p.units?.reduce((s, u) => s + u.rent_amount, 0) ?? 0), 0
-  );
+  const totalMonthlyRent = properties.reduce((sum, p) => sum + (p.units?.reduce((s, u) => s + u.rent_amount, 0) ?? 0), 0);
   const totalMonthlyExpenses = properties.reduce((sum, p) =>
     sum + (p.mortgage ?? 0) + Math.round((p.insurance ?? 0) / 12) + Math.round((p.tax_annual ?? 0) / 12), 0
   );
   const monthlyNOI = totalMonthlyRent - totalMonthlyExpenses;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text className="text-2xl font-bold text-gray-900 mb-6">Financials</Text>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Text style={styles.pageTitle}>Financials</Text>
 
-        {/* Portfolio summary */}
-        <View className="bg-white rounded-2xl p-5 mb-4 border border-gray-100 shadow-sm">
-          <Text className="font-semibold text-gray-700 mb-4">Portfolio Monthly</Text>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-gray-500">Gross rent</Text>
-            <Text className="font-medium text-gray-900">{formatCents(totalMonthlyRent)}</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Portfolio Monthly</Text>
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>Gross rent</Text>
+            <Text style={styles.rowValue}>{formatCents(totalMonthlyRent)}</Text>
           </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-gray-500">Expenses (est.)</Text>
-            <Text className="font-medium text-red-500">-{formatCents(totalMonthlyExpenses)}</Text>
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>Expenses (est.)</Text>
+            <Text style={[styles.rowValue, { color: colors.red[500] }]}>-{formatCents(totalMonthlyExpenses)}</Text>
           </View>
-          <View className="h-px bg-gray-100 my-3" />
-          <View className="flex-row justify-between">
-            <Text className="font-semibold text-gray-900">Net operating income</Text>
-            <Text className={`font-bold text-lg ${monthlyNOI >= 0 ? 'text-brand-600' : 'text-red-600'}`}>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <Text style={styles.rowLabelBold}>Net operating income</Text>
+            <Text style={[styles.noiValue, { color: monthlyNOI >= 0 ? colors.brand[600] : colors.red[600] }]}>
               {formatCents(monthlyNOI)}
             </Text>
           </View>
         </View>
 
-        {/* Per-property breakdown */}
         {properties.map((p) => {
           const rent = p.units?.reduce((s, u) => s + u.rent_amount, 0) ?? 0;
           const expenses = (p.mortgage ?? 0) + Math.round((p.insurance ?? 0) / 12) + Math.round((p.tax_annual ?? 0) / 12);
           const noi = rent - expenses;
-          const annualNOI = noi * 12;
 
           return (
-            <View key={p.id} className="bg-white rounded-2xl p-5 mb-3 border border-gray-100 shadow-sm">
-              <Text className="font-semibold text-gray-900 mb-4">{p.nickname ?? p.address}</Text>
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-gray-500">Monthly rent</Text>
-                <Text className="font-medium">{formatCents(rent)}</Text>
+            <View key={p.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{p.nickname ?? p.address}</Text>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Monthly rent</Text>
+                <Text style={styles.rowValue}>{formatCents(rent)}</Text>
               </View>
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-gray-500">Monthly expenses</Text>
-                <Text className="font-medium text-red-500">-{formatCents(expenses)}</Text>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Monthly expenses</Text>
+                <Text style={[styles.rowValue, { color: colors.red[500] }]}>-{formatCents(expenses)}</Text>
               </View>
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-gray-500">Monthly NOI</Text>
-                <Text className={`font-semibold ${noi >= 0 ? 'text-brand-600' : 'text-red-600'}`}>{formatCents(noi)}</Text>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Monthly NOI</Text>
+                <Text style={[styles.rowValue, { fontWeight: '600', color: noi >= 0 ? colors.brand[600] : colors.red[600] }]}>{formatCents(noi)}</Text>
               </View>
-              <View className="h-px bg-gray-100 my-2" />
-              <Text className="text-gray-400 text-xs">Annual NOI: {formatCents(annualNOI)}</Text>
-              {p.mortgage && (
-                <Text className="text-gray-400 text-xs mt-1">
-                  Cap rate requires property value — ask Tend AI to calculate
-                </Text>
-              )}
+              <View style={styles.divider} />
+              <Text style={styles.hint}>Annual NOI: {formatCents(noi * 12)}</Text>
+              {p.mortgage ? <Text style={styles.hint}>Cap rate requires property value — ask Tend AI</Text> : null}
             </View>
           );
         })}
@@ -78,3 +70,18 @@ export default function FinancialsScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.gray[50] },
+  scroll: { padding: 20 },
+  pageTitle: { fontSize: text['2xl'], fontWeight: '700', color: colors.gray[900], marginBottom: 24 },
+  card: { backgroundColor: colors.white, borderRadius: radius['2xl'], padding: 20, marginBottom: 16, borderWidth: 1, borderColor: colors.gray[100], ...shadow.sm },
+  cardTitle: { fontWeight: '600', color: colors.gray[700], fontSize: text.base, marginBottom: 16 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  rowLabel: { color: colors.gray[500], fontSize: text.base },
+  rowLabelBold: { fontWeight: '600', color: colors.gray[900], fontSize: text.base },
+  rowValue: { fontWeight: '500', color: colors.gray[900], fontSize: text.base },
+  noiValue: { fontWeight: '700', fontSize: text.lg },
+  divider: { height: 1, backgroundColor: colors.gray[100], marginVertical: 12 },
+  hint: { color: colors.gray[400], fontSize: text.xs, marginTop: 2 },
+});

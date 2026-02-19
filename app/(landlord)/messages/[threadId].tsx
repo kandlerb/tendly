@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { KeyboardView } from '../../../components/ui/KeyboardView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { Send, Sparkles } from 'lucide-react-native';
 import { useMessagesStore } from '../../../store/messages';
 import { useAuthStore } from '../../../store/auth';
+import { colors, text, radius } from '../../../lib/theme';
 
 export default function MessageThreadScreen() {
   const { threadId } = useLocalSearchParams<{ threadId: string }>();
@@ -13,7 +15,6 @@ export default function MessageThreadScreen() {
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
-
   const threadMessages = messages[threadId] ?? [];
 
   useEffect(() => {
@@ -23,25 +24,21 @@ export default function MessageThreadScreen() {
   }, [threadId]);
 
   useEffect(() => {
-    if (threadMessages.length > 0) {
-      listRef.current?.scrollToEnd({ animated: true });
-    }
+    if (threadMessages.length > 0) listRef.current?.scrollToEnd({ animated: true });
   }, [threadMessages.length]);
 
-  async function handleSend(text: string, aiDrafted = false) {
-    if (!text.trim()) return;
+  async function handleSend() {
+    if (!body.trim()) return;
     setSending(true);
+    const text = body;
     setBody('');
-    await sendMessage(threadId, text, aiDrafted);
+    await sendMessage(threadId, text);
     setSending(false);
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+    <SafeAreaView style={styles.safe}>
+      <KeyboardView style={styles.flex}>
         <FlatList
           ref={listRef}
           data={threadMessages}
@@ -50,38 +47,45 @@ export default function MessageThreadScreen() {
           renderItem={({ item }) => {
             const isMe = item.sender_id === user?.id;
             return (
-              <View className={`mb-3 max-w-xs ${isMe ? 'self-end' : 'self-start'}`}>
+              <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
                 {item.ai_drafted && (
-                  <View className="flex-row items-center mb-1">
-                    <Sparkles size={10} color="#16a34a" />
-                    <Text className="text-brand-600 text-xs ml-1">AI drafted</Text>
+                  <View style={styles.aiTag}>
+                    <Sparkles size={10} color={colors.brand[600]} />
+                    <Text style={styles.aiTagText}>AI drafted</Text>
                   </View>
                 )}
-                <View className={`px-4 py-3 rounded-2xl ${isMe ? 'bg-brand-600' : 'bg-white border border-gray-100'}`}>
-                  <Text className={isMe ? 'text-white' : 'text-gray-900'}>{item.body}</Text>
+                <View style={[styles.bubbleInner, isMe ? styles.bubbleInnerMe : styles.bubbleInnerThem]}>
+                  <Text style={isMe ? styles.bubbleTextMe : styles.bubbleTextThem}>{item.body}</Text>
                 </View>
               </View>
             );
           }}
         />
-
-        <View className="px-4 pb-4 flex-row items-end gap-2">
-          <TextInput
-            className="flex-1 bg-white border border-gray-200 rounded-2xl px-4 py-3 text-base max-h-32"
-            placeholder="Message..."
-            value={body}
-            onChangeText={setBody}
-            multiline
-          />
-          <TouchableOpacity
-            className="bg-brand-600 w-11 h-11 rounded-xl items-center justify-center"
-            onPress={() => handleSend(body)}
-            disabled={sending || !body.trim()}
-          >
+        <View style={styles.inputRow}>
+          <TextInput style={styles.input} placeholder="Message..." value={body} onChangeText={setBody} multiline />
+          <TouchableOpacity style={[styles.sendBtn, (sending || !body.trim()) && { opacity: 0.5 }]} onPress={handleSend}>
             <Send size={18} color="white" />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.gray[50] },
+  flex: { flex: 1 },
+  bubble: { marginBottom: 12, maxWidth: 280 },
+  bubbleMe: { alignSelf: 'flex-end' },
+  bubbleThem: { alignSelf: 'flex-start' },
+  aiTag: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  aiTagText: { color: colors.brand[600], fontSize: text.xs, marginLeft: 4 },
+  bubbleInner: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius['2xl'] },
+  bubbleInnerMe: { backgroundColor: colors.brand[600] },
+  bubbleInnerThem: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[100] },
+  bubbleTextMe: { color: colors.white, fontSize: text.base },
+  bubbleTextThem: { color: colors.gray[900], fontSize: text.base },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
+  input: { flex: 1, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.gray[200], borderRadius: radius['2xl'], paddingHorizontal: 16, paddingVertical: 12, fontSize: text.base, maxHeight: 128 },
+  sendBtn: { backgroundColor: colors.brand[600], width: 44, height: 44, borderRadius: radius.xl, alignItems: 'center', justifyContent: 'center' },
+});

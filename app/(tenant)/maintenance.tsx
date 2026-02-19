@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'lucide-react-native';
@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { callTriage } from '../../lib/claude';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { showAlert } from '../../lib/alert';
 import { useAuthStore } from '../../store/auth';
 
 export default function TenantMaintenanceScreen() {
@@ -14,20 +15,33 @@ export default function TenantMaintenanceScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   async function pickPhoto() {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
-    if (!result.canceled) {
-      setPhotos((prev) => [...prev, result.assets[0].uri]);
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e: Event) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          setPhotos((prev) => [...prev, URL.createObjectURL(file)]);
+          setPhotoFiles((prev) => [...prev, file]);
+        }
+      };
+      input.click();
+    } else {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
+      });
+      if (!result.canceled) setPhotos((prev) => [...prev, result.assets[0].uri]);
     }
   }
 
   async function handleSubmit() {
-    if (!title || !description) { Alert.alert('Please fill in title and description'); return; }
+    if (!title || !description) { showAlert('Please fill in title and description'); return; }
     setSubmitting(true);
 
     const { data: lease } = await supabase
@@ -37,7 +51,7 @@ export default function TenantMaintenanceScreen() {
       .eq('status', 'active')
       .single();
 
-    if (!lease) { Alert.alert('No active lease found'); setSubmitting(false); return; }
+    if (!lease) { showAlert('No active lease found'); setSubmitting(false); return; }
 
     let urgency = 'routine', trade = 'general';
     try {
@@ -47,12 +61,20 @@ export default function TenantMaintenanceScreen() {
     } catch { /* use defaults */ }
 
     const photoUrls: string[] = [];
-    for (const uri of photos) {
+    for (let i = 0; i < photos.length; i++) {
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-      const { data } = await supabase.storage.from('documents').upload(fileName, { uri, type: 'image/jpeg' } as any);
-      if (data) {
-        const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path);
-        photoUrls.push(publicUrl);
+      if (Platform.OS === 'web' && photoFiles[i]) {
+        const { data } = await supabase.storage.from('documents').upload(fileName, photoFiles[i]);
+        if (data) {
+          const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path);
+          photoUrls.push(publicUrl);
+        }
+      } else {
+        const { data } = await supabase.storage.from('documents').upload(fileName, { uri: photos[i], type: 'image/jpeg' } as any);
+        if (data) {
+          const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(data.path);
+          photoUrls.push(publicUrl);
+        }
       }
     }
 
@@ -66,8 +88,8 @@ export default function TenantMaintenanceScreen() {
       trade,
     });
 
-    Alert.alert('Submitted', `Your ${urgency} request has been sent to your landlord.`);
-    setTitle(''); setDescription(''); setPhotos([]);
+    showAlert('Submitted', `Your ${urgency} request has been sent to your landlord.`);
+    setTitle(''); setDescription(''); setPhotos([]); setPhotoFiles([]);
     setSubmitting(false);
   }
 

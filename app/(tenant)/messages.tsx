@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { KeyboardView } from '../../components/ui/KeyboardView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
@@ -57,7 +58,7 @@ export default function TenantMessagesScreen() {
         <Text className="text-xl font-bold text-gray-900">Messages</Text>
       </View>
 
-      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardView style={{ flex: 1 }}>
         <FlatList
           ref={listRef}
           data={threadMessages}
@@ -96,7 +97,7 @@ export default function TenantMessagesScreen() {
             <Send size={18} color="white" />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardView>
     </SafeAreaView>
   );
 }
