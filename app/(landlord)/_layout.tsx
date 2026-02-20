@@ -2,8 +2,7 @@ import { useWindowDimensions, TouchableOpacity } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
 import { Home, Building2, Users, Wrench, MessageSquare, Bot, User } from 'lucide-react-native';
 import { SidebarLayout } from '../../components/ui/SidebarLayout';
-
-const DESKTOP_BREAKPOINT = 768;
+import { breakpoints, colors } from '../../lib/theme';
 
 const LANDLORD_NAV_ITEMS = [
   { label: 'Dashboard',   icon: Home,          route: '/(landlord)/dashboard',   segment: 'dashboard' },
@@ -18,15 +17,15 @@ export default function LandlordLayout() {
   const { width } = useWindowDimensions();
   const router = useRouter();
 
-  if (width >= DESKTOP_BREAKPOINT) return <SidebarLayout navItems={LANDLORD_NAV_ITEMS} />;
+  if (width >= breakpoints.md) return <SidebarLayout navItems={LANDLORD_NAV_ITEMS} />;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#16a34a',
-        tabBarInactiveTintColor: '#9ca3af',
-        tabBarStyle: { borderTopColor: '#f3f4f6' },
+        tabBarActiveTintColor: colors.brand[600],
+        tabBarInactiveTintColor: colors.gray[400],
+        tabBarStyle: { borderTopColor: colors.gray[100] },
       }}
     >
       <Tabs.Screen name="dashboard" options={{ title: 'Home', tabBarIcon: ({ color }) => <Home size={22} color={color} /> }} />
@@ -34,7 +33,9 @@ export default function LandlordLayout() {
       <Tabs.Screen name="tenants/index" options={{ title: 'Tenants', tabBarIcon: ({ color }) => <Users size={22} color={color} /> }} />
       <Tabs.Screen name="maintenance/index" options={{ title: 'Maintenance', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
       <Tabs.Screen name="messages/index" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
-      <Tabs.Screen name="tend" options={{ title: 'Tend AI', tabBarIcon: ({ color }) => <Bot size={22} color={color} /> }} />
+
+      {/* Tend AI hidden from mobile tab bar — accessible via sidebar on desktop */}
+      <Tabs.Screen name="tend" options={{ href: null }} />
       <Tabs.Screen name="financials/index" options={{ href: null }} />
 
       {/* Hide sub-routes from tab bar */}
@@ -54,6 +55,8 @@ export default function LandlordLayout() {
             <TouchableOpacity
               style={props.style as any}
               onPress={() => router.push('/profile')}
+              accessibilityRole="button"
+              accessibilityLabel="Go to profile"
             >
               {props.children}
             </TouchableOpacity>

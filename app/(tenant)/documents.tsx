@@ -12,7 +12,7 @@ import { useAuthStore } from '../../store/auth';
 import { getSignedUrl, acknowledgeDocument } from '../../lib/claude';
 import { showAlert } from '../../lib/alert';
 import { formatDate } from '../../lib/utils';
-import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../lib/theme';
+import { colors, text, radius, shadow, spacing, cardBase, headerBase, breakpoints } from '../../lib/theme';
 import type { Document, DocumentType } from '../../types';
 
 const DOC_TYPE_LABELS: Record<DocumentType, string> = {
@@ -70,6 +70,9 @@ function DocCard({
         <TouchableOpacity
           style={[styles.docBtn, viewing && { opacity: 0.6 }]}
           onPress={viewing ? undefined : onView}
+          accessibilityRole="button"
+          accessibilityLabel={`View document: ${doc.name}`}
+          accessibilityState={{ disabled: viewing }}
         >
           {viewing
             ? <ActivityIndicator size="small" color={colors.brand[600]} />
@@ -82,6 +85,9 @@ function DocCard({
           <TouchableOpacity
             style={[styles.docBtn, styles.docBtnOutline, acknowledging && { opacity: 0.6 }]}
             onPress={acknowledging ? undefined : onAcknowledge}
+            accessibilityRole="button"
+            accessibilityLabel={`Acknowledge document: ${doc.name}`}
+            accessibilityState={{ disabled: acknowledging }}
           >
             {acknowledging
               ? <ActivityIndicator size="small" color={colors.gray[700]} />
@@ -105,8 +111,8 @@ export default function TenantDocumentsScreen() {
   const [acknowledgingId, setAcknowledgingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const isWide = width >= 768;
-  const hPad = isWide ? 24 : 20;
+  const isWide = width >= breakpoints.md;
+  const hPad = isWide ? spacing.pagePadWide : spacing.pagePad;
 
   useEffect(() => {
     if (user) loadDocuments();
@@ -257,6 +263,9 @@ export default function TenantDocumentsScreen() {
                   <TouchableOpacity
                     style={[styles.uploadBtn, uploading && { opacity: 0.6 }]}
                     onPress={uploading ? undefined : handleUpload}
+                    accessibilityRole="button"
+                    accessibilityLabel={uploading ? 'Uploading document' : 'Upload renters insurance document'}
+                    accessibilityState={{ disabled: uploading }}
                   >
                     {uploading
                       ? <ActivityIndicator size="small" color={colors.brand[600]} />

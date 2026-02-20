@@ -49,6 +49,17 @@ export const text = {
   display:    36,  // hero display numbers (e.g. pending payment amount)
 };
 
+// Line heights at 1.5× font size for each semantic role (Rule 08)
+export const lineHeights = {
+  caption:    18,  // 12 × 1.5
+  secondary:  21,  // 14 × 1.5
+  body:       24,  // 16 × 1.5
+  subheading: 27,  // 18 × 1.5
+  heading:    30,  // 20 × 1.5
+  pageTitle:  36,  // 24 × 1.5
+  statNum:    45,  // 30 × 1.5
+};
+
 export const radius = {
   md: 8,
   lg: 12,
@@ -56,8 +67,21 @@ export const radius = {
   '2xl': 20,
 };
 
-// Spacing scale — use these instead of hardcoded numbers
+// Responsive breakpoints — use instead of hardcoded 768/1024 (Rule 12)
+export const breakpoints = {
+  md: 768,   // sidebar layout kicks in
+  lg: 1024,  // wide content area
+} as const;
+
+// Spacing scale — 8px base grid (Rule 09)
 export const spacing = {
+  xs:   4,
+  sm:   8,
+  md:   16,
+  lg:   24,
+  xl:   32,
+  '2xl': 48,
+  // Named semantic slots (kept for backward compat)
   pagePad:      20,  // horizontal page padding (mobile)
   pagePadWide:  24,  // horizontal page padding (desktop)
   cardPad:      20,  // padding inside every content card
@@ -68,9 +92,9 @@ export const spacing = {
 // Base page header — spread into every screen's header StyleSheet definition
 // Apply paddingHorizontal inline (it's responsive: hPad = isWide ? 24 : 20)
 export const headerBase = {
-  backgroundColor: '#ffffff',
+  backgroundColor: colors.white,
   borderBottomWidth: 1,
-  borderBottomColor: '#f3f4f6',  // colors.gray[100]
+  borderBottomColor: colors.gray[100],
   paddingTop:    20,
   paddingBottom: 16,
 };
@@ -78,10 +102,10 @@ export const headerBase = {
 // Base card appearance — spread into every StyleSheet card definition
 // alongside ...shadow.sm and any layout overrides (flex, flexDirection, etc.)
 export const cardBase = {
-  backgroundColor: '#ffffff',   // colors.white (avoid circular ref)
+  backgroundColor: colors.white,
   borderRadius:    20,           // radius['2xl']
   borderWidth:     1,
-  borderColor:     '#f3f4f6',   // colors.gray[100]
+  borderColor:     colors.gray[100],
 };
 
 export const shadow = {

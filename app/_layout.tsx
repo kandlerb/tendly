@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { Linking } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/auth';
 
@@ -132,19 +133,22 @@ export default function RootLayout() {
   }, [session, segments, initialized, activeView]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(landlord)" />
-      <Stack.Screen name="(tenant)" />
-      <Stack.Screen
-        name="profile"
-        options={{
-          presentation: 'modal',
-          headerShown: true,
-          title: 'Profile',
-          headerBackTitle: 'Back',
-        }}
-      />
-    </Stack>
+    <>
+      <StatusBar style="dark" />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(landlord)" />
+        <Stack.Screen name="(tenant)" />
+        <Stack.Screen
+          name="profile"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Profile',
+            headerBackTitle: 'Back',
+          }}
+        />
+      </Stack>
+    </>
   );
 }

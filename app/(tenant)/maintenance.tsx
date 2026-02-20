@@ -9,7 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { showAlert } from '../../lib/alert';
 import { useAuthStore } from '../../store/auth';
-import { colors, text, radius, headerBase } from '../../lib/theme';
+import { colors, text, radius, headerBase, breakpoints, spacing } from '../../lib/theme';
 
 export default function TenantMaintenanceScreen() {
   const { user } = useAuthStore();
@@ -20,8 +20,8 @@ export default function TenantMaintenanceScreen() {
   const [submitting, setSubmitting] = useState(false);
   const { width } = useWindowDimensions();
 
-  const isWide = width >= 768;
-  const hPad = isWide ? 24 : 20;
+  const isWide = width >= breakpoints.md;
+  const hPad = isWide ? spacing.pagePadWide : spacing.pagePad;
 
   async function pickPhoto() {
     if (Platform.OS === 'web') {
@@ -115,7 +115,12 @@ export default function TenantMaintenanceScreen() {
           <Input label="What's the issue?" value={title} onChangeText={setTitle} placeholder="Leaking faucet" />
           <Input label="Describe the problem" value={description} onChangeText={setDescription} multiline placeholder="The kitchen faucet has been dripping constantly for 2 days..." />
 
-          <TouchableOpacity style={styles.photoBtn} onPress={pickPhoto}>
+          <TouchableOpacity
+            style={styles.photoBtn}
+            onPress={pickPhoto}
+            accessibilityRole="button"
+            accessibilityLabel="Add photos"
+          >
             <Camera size={24} color={colors.gray[400]} />
             <Text style={styles.photoBtnText}>Add photos</Text>
           </TouchableOpacity>
@@ -143,7 +148,7 @@ const styles = StyleSheet.create({
   content:     { paddingBottom: 40, gap: 16 },
   contentWide: { alignItems: 'center' },
   formWide:    { width: '100%', maxWidth: 600 },
-  photoBtn:    { borderWidth: 2, borderStyle: 'dashed', borderColor: colors.gray[200], borderRadius: radius['2xl'], padding: 16, alignItems: 'center', gap: 8 },
+  photoBtn:    { borderWidth: 2, borderStyle: 'dashed', borderColor: colors.gray[200], borderRadius: radius['2xl'], padding: 16, alignItems: 'center', gap: 8, minHeight: 48 },
   photoBtnText:{ color: colors.gray[400] },
   photoRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photoThumb:  { width: 80, height: 80, borderRadius: radius.xl },

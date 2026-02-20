@@ -2,8 +2,7 @@ import { useWindowDimensions, TouchableOpacity } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
 import { CreditCard, Wrench, MessageSquare, FileText, User } from 'lucide-react-native';
 import { SidebarLayout } from '../../components/ui/SidebarLayout';
-
-const DESKTOP_BREAKPOINT = 768;
+import { breakpoints, colors } from '../../lib/theme';
 
 const TENANT_NAV_ITEMS = [
   { label: 'Pay Rent',   icon: CreditCard,    route: '/(tenant)/pay',         segment: 'pay' },
@@ -16,10 +15,10 @@ export default function TenantLayout() {
   const { width } = useWindowDimensions();
   const router = useRouter();
 
-  if (width >= DESKTOP_BREAKPOINT) return <SidebarLayout navItems={TENANT_NAV_ITEMS} />;
+  if (width >= breakpoints.md) return <SidebarLayout navItems={TENANT_NAV_ITEMS} />;
 
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: '#16a34a' }}>
+    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand[600] }}>
       <Tabs.Screen name="pay" options={{ title: 'Pay Rent', tabBarIcon: ({ color }) => <CreditCard size={22} color={color} /> }} />
       <Tabs.Screen name="maintenance" options={{ title: 'Requests', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
       <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
@@ -36,6 +35,8 @@ export default function TenantLayout() {
             <TouchableOpacity
               style={props.style as any}
               onPress={() => router.push('/profile')}
+              accessibilityRole="button"
+              accessibilityLabel="Go to profile"
             >
               {props.children}
             </TouchableOpacity>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   useWindowDimensions, Modal, ActivityIndicator, TextInput, ScrollView,
@@ -11,7 +11,7 @@ import { usePropertiesStore } from '../../../store/properties';
 import { inviteTenant } from '../../../lib/claude';
 import { formatCents, formatDate } from '../../../lib/utils';
 import { showAlert } from '../../../lib/alert';
-import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../../lib/theme';
+import { colors, text, radius, shadow, spacing, cardBase, headerBase, breakpoints } from '../../../lib/theme';
 import type { TenantWithLease, TenantInvitation } from '../../../types';
 
 function daysUntil(dateStr: string) {
@@ -50,15 +50,22 @@ function TenantCard({ tenant, onPress }: { tenant: TenantWithLease; onPress: () 
   const endColor = leaseEndColor(endDate);
   const endBg = leaseEndBg(endDate);
   const days = daysUntil(endDate);
+  const name = tenant.tenant?.full_name ?? 'Tenant';
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={`${name}, ${address}${unitNum ? ` Unit ${unitNum}` : ''}, lease ${days > 0 ? `${days} days left` : 'expired'}`}
+    >
       <View style={styles.cardRow}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initialsFor(tenant.tenant?.full_name ?? '?')}</Text>
+          <Text style={styles.avatarText}>{initialsFor(name)}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.tenantName}>{tenant.tenant?.full_name}</Text>
+          <Text style={styles.tenantName}>{name}</Text>
           <Text style={styles.tenantSub}>{address}{unitNum ? ` · Unit ${unitNum}` : ''}</Text>
         </View>
         {tenant.recentPayment && (
@@ -111,9 +118,12 @@ export default function TenantsScreen() {
     unitId: '', email: '', rentAmount: '', depositAmount: '', startDate: '', endDate: '',
   });
 
-  const isWide = width >= 768;
-  const hPad = isWide ? 24 : 20;
-  const gap = 16;
+  // Ref for the email input to allow autoFocus when modal opens
+  const emailInputRef = useRef<TextInput>(null);
+
+  const isWide = width >= breakpoints.md;
+  const hPad = isWide ? spacing.pagePadWide : spacing.pagePad;
+  const gap = spacing.cardGap;
   const colW = isWide ? (width - 220 - hPad * 2 - gap) / 2 : undefined;
 
   useEffect(() => {
@@ -122,12 +132,22 @@ export default function TenantsScreen() {
     fetchProperties();
   }, []);
 
+  function openModal() {
+    setModalVisible(true);
+  }
+
+  function closeModal() {
+    setModalVisible(false);
+    setForm({ unitId: '', email: '', rentAmount: '', depositAmount: '', startDate: '', endDate: '' });
+  }
+
   async function handleInvite() {
     const { unitId, email, rentAmount, depositAmount, startDate, endDate } = form;
-    if (!unitId || !email || !rentAmount || !startDate || !endDate) {
-      showAlert('Please fill in all required fields');
-      return;
-    }
+    if (!unitId) { showAlert('Select a unit', 'Tap one of the unit chips above the email field.'); return; }
+    if (!email) { showAlert('Enter tenant email'); return; }
+    if (!rentAmount) { showAlert('Enter monthly rent'); return; }
+    if (!startDate) { showAlert('Enter lease start date (YYYY-MM-DD)'); return; }
+    if (!endDate) { showAlert('Enter lease end date (YYYY-MM-DD)'); return; }
     setSending(true);
     try {
       await inviteTenant({
@@ -139,8 +159,7 @@ export default function TenantsScreen() {
         endDate,
       });
       showAlert('Invite sent', `An invitation email has been sent to ${email}.`);
-      setModalVisible(false);
-      setForm({ unitId: '', email: '', rentAmount: '', depositAmount: '', startDate: '', endDate: '' });
+      closeModal();
       fetchInvitations();
     } catch (e: any) {
       showAlert('Failed to send invite', e?.message ?? 'Unknown error');
@@ -158,7 +177,12 @@ export default function TenantsScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={[styles.header, { paddingHorizontal: hPad }]}>
         <Text style={styles.title}>Tenants</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={openModal}
+          accessibilityRole="button"
+          accessibilityLabel="Invite tenant"
+        >
           <Plus size={20} color="white" />
         </TouchableOpacity>
       </View>
@@ -199,40 +223,66 @@ export default function TenantsScreen() {
       />
 
       {/* Invite Modal */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onShow={() => emailInputRef.current?.focus()}
+      >
         <SafeAreaView style={styles.modalSafe}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Invite Tenant</Text>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
+            <TouchableOpacity
+              onPress={closeModal}
+              accessibilityRole="button"
+              accessibilityLabel="Close invite modal"
+            >
               <X size={22} color={colors.gray[700]} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.modalBody}>
             <Text style={styles.fieldLabel}>Unit *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {allUnits.map((u) => (
-                  <TouchableOpacity
-                    key={u.id}
-                    style={[styles.unitChip, form.unitId === u.id && styles.unitChipSelected]}
-                    onPress={() => setForm((f) => ({ ...f, unitId: u.id }))}
-                  >
-                    <Text style={[styles.unitChipText, form.unitId === u.id && { color: colors.brand[600] }]}>
-                      {(u.property as any).nickname ?? (u.property as any).address} · {u.unit_number}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
+            {allUnits.length === 0 ? (
+              <Text style={[styles.fieldLabel, { color: colors.red[500], marginBottom: 16 }]}>
+                No units found — add a property with units first.
+              </Text>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {allUnits.map((u) => (
+                    <TouchableOpacity
+                      key={u.id}
+                      style={[styles.unitChip, form.unitId === u.id && styles.unitChipSelected]}
+                      onPress={() => setForm((f) => ({ ...f, unitId: u.id }))}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select unit: ${(u.property as any).nickname ?? (u.property as any).address} ${u.unit_number}`}
+                      accessibilityState={{ selected: form.unitId === u.id }}
+                    >
+                      <Text style={[styles.unitChipText, form.unitId === u.id && { color: colors.brand[600] }]}>
+                        {(u.property as any).nickname ?? (u.property as any).address} · {u.unit_number}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
+            {allUnits.length > 0 && !form.unitId && (
+              <Text style={[styles.fieldLabel, { color: colors.gray[400], marginTop: -10, marginBottom: 12 }]}>
+                ↑ Tap a unit to select it
+              </Text>
+            )}
 
             <Text style={styles.fieldLabel}>Tenant Email *</Text>
             <TextInput
+              ref={emailInputRef}
               style={styles.input}
               value={form.email}
               onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
               placeholder="tenant@example.com"
+              placeholderTextColor={colors.gray[300]}
               keyboardType="email-address"
               autoCapitalize="none"
+              accessibilityLabel="Tenant email address"
             />
 
             <Text style={styles.fieldLabel}>Monthly Rent ($) *</Text>
@@ -241,7 +291,9 @@ export default function TenantsScreen() {
               value={form.rentAmount}
               onChangeText={(v) => setForm((f) => ({ ...f, rentAmount: v }))}
               placeholder="1500"
+              placeholderTextColor={colors.gray[300]}
               keyboardType="decimal-pad"
+              accessibilityLabel="Monthly rent amount in dollars"
             />
 
             <Text style={styles.fieldLabel}>Security Deposit ($)</Text>
@@ -250,7 +302,9 @@ export default function TenantsScreen() {
               value={form.depositAmount}
               onChangeText={(v) => setForm((f) => ({ ...f, depositAmount: v }))}
               placeholder="1500"
+              placeholderTextColor={colors.gray[300]}
               keyboardType="decimal-pad"
+              accessibilityLabel="Security deposit amount in dollars"
             />
 
             <Text style={styles.fieldLabel}>Lease Start Date * (YYYY-MM-DD)</Text>
@@ -259,6 +313,8 @@ export default function TenantsScreen() {
               value={form.startDate}
               onChangeText={(v) => setForm((f) => ({ ...f, startDate: v }))}
               placeholder="2026-03-01"
+              placeholderTextColor={colors.gray[300]}
+              accessibilityLabel="Lease start date in YYYY-MM-DD format"
             />
 
             <Text style={styles.fieldLabel}>Lease End Date * (YYYY-MM-DD)</Text>
@@ -267,11 +323,16 @@ export default function TenantsScreen() {
               value={form.endDate}
               onChangeText={(v) => setForm((f) => ({ ...f, endDate: v }))}
               placeholder="2027-02-28"
+              placeholderTextColor={colors.gray[300]}
+              accessibilityLabel="Lease end date in YYYY-MM-DD format"
             />
 
             <TouchableOpacity
               style={[styles.sendBtn, sending && { opacity: 0.6 }]}
               onPress={sending ? undefined : handleInvite}
+              accessibilityRole="button"
+              accessibilityLabel="Send invitation"
+              accessibilityState={{ disabled: sending }}
             >
               {sending
                 ? <ActivityIndicator size="small" color={colors.white} />
@@ -289,7 +350,7 @@ const styles = StyleSheet.create({
   safe:             { flex: 1, backgroundColor: colors.gray[50] },
   header:           { ...headerBase, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title:            { fontSize: text.pageTitle, fontWeight: '700', color: colors.gray[900] },
-  addBtn:           { backgroundColor: colors.brand[600], borderRadius: radius.xl, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  addBtn:           { backgroundColor: colors.brand[600], borderRadius: radius.xl, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   empty:            { alignItems: 'center', paddingVertical: 64 },
   emptyMain:        { color: colors.gray[400], fontSize: text.body },
   emptySub:         { color: colors.gray[300], fontSize: text.secondary, marginTop: 4 },
@@ -321,10 +382,10 @@ const styles = StyleSheet.create({
   modalTitle:       { fontSize: text.pageTitle, fontWeight: '700', color: colors.gray[900] },
   modalBody:        { padding: 20, paddingBottom: 60 },
   fieldLabel:       { fontSize: text.secondary, fontWeight: '600', color: colors.gray[700], marginBottom: 6 },
-  input:            { ...cardBase, borderColor: colors.gray[200], padding: 14, fontSize: text.body, color: colors.gray[900], marginBottom: 16 },
-  unitChip:         { borderRadius: radius.xl, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: colors.gray[200], backgroundColor: colors.gray[50] },
+  input:            { ...cardBase, borderColor: colors.gray[200], padding: 14, fontSize: text.body, color: colors.gray[900], marginBottom: 16, minHeight: 48 },
+  unitChip:         { borderRadius: radius.xl, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: colors.gray[200], backgroundColor: colors.gray[50], minHeight: 48, justifyContent: 'center' },
   unitChipSelected: { borderColor: colors.brand[600], backgroundColor: colors.brand[50] },
   unitChipText:     { fontSize: text.secondary, color: colors.gray[700] },
-  sendBtn:          { backgroundColor: colors.brand[600], borderRadius: radius.xl, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  sendBtn:          { backgroundColor: colors.brand[600], borderRadius: radius.xl, paddingVertical: 16, alignItems: 'center', marginTop: 8, minHeight: 48 },
   sendBtnText:      { color: colors.white, fontWeight: '700', fontSize: text.body },
 });

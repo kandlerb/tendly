@@ -50,6 +50,9 @@ export function SidebarLayout({ navItems }: SidebarLayoutProps) {
                 key={item.route}
                 style={[styles.navItem, isActive && styles.navItemActive]}
                 onPress={() => router.push(item.route as any)}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+                accessibilityState={{ selected: isActive }}
               >
                 <Icon size={18} color={isActive ? colors.brand[600] : colors.gray[500]} />
                 <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
@@ -71,6 +74,8 @@ export function SidebarLayout({ navItems }: SidebarLayoutProps) {
           <TouchableOpacity
             style={styles.profileRow}
             onPress={() => router.push('/profile')}
+            accessibilityRole="button"
+            accessibilityLabel="Go to profile"
           >
             <View style={styles.profileAvatar}>
               <Text style={styles.profileAvatarText}>
@@ -86,7 +91,12 @@ export function SidebarLayout({ navItems }: SidebarLayoutProps) {
               </Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.signOutRow} onPress={handleSignOut}>
+          <TouchableOpacity
+            style={styles.signOutRow}
+            onPress={handleSignOut}
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+          >
             <LogOut size={16} color={colors.gray[500]} />
             <Text style={styles.signOutText}>Sign out</Text>
           </TouchableOpacity>
@@ -105,7 +115,7 @@ const styles = StyleSheet.create({
   brand:          { padding: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.gray[100] },
   brandName:      { fontSize: text.heading, fontWeight: '700', color: colors.brand[600] },
   nav:            { flex: 1, paddingTop: 12 },
-  navItem:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, marginHorizontal: 8, marginBottom: 2, borderRadius: radius.lg, gap: 12 },
+  navItem:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, marginHorizontal: 8, marginBottom: 2, borderRadius: radius.lg, gap: 12, minHeight: 48 },
   navItemActive:  { backgroundColor: colors.brand[50] },
   navLabel:       { fontSize: text.secondary, color: colors.gray[500], fontWeight: '500' },
   navLabelActive: { color: colors.brand[600], fontWeight: '600' },

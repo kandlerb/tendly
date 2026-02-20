@@ -1,18 +1,40 @@
 import { createClient } from 'npm:@supabase/supabase-js';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
 Deno.serve(async (req) => {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader) return new Response('Unauthorized', { status: 401 });
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
-    authHeader.replace('Bearer ', '')
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Verify JWT using user-scoped client
+  const supabaseUser = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: authHeader } } }
   );
-  if (authError || !user) return new Response('Unauthorized', { status: 401 });
+  const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: authError?.message ?? 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
   const { documentId } = await req.json();
 
@@ -26,7 +48,7 @@ Deno.serve(async (req) => {
   if (docError || !doc) {
     return new Response(JSON.stringify({ error: 'Document not found' }), {
       status: 404,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -42,7 +64,7 @@ Deno.serve(async (req) => {
   if (leaseError || !lease) {
     return new Response(JSON.stringify({ error: 'Access denied' }), {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -55,6 +77,6 @@ Deno.serve(async (req) => {
 
   return new Response(
     JSON.stringify({ acknowledgedAt }),
-    { headers: { 'Content-Type': 'application/json' } }
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 });

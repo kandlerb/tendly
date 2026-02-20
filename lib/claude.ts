@@ -9,7 +9,11 @@ export async function inviteTenant(params: {
   endDate: string;
 }) {
   const { data, error } = await supabase.functions.invoke('invite-tenant', { body: params });
-  if (error) throw error;
+  if (error) {
+    const body = await (error as any).context?.json?.().catch(() => null);
+    if (body?.error) throw new Error(body.error);
+    throw error;
+  }
   return data as { invitationId: string; token: string };
 }
 

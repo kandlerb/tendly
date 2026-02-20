@@ -9,11 +9,14 @@ interface Props { property: Property; }
 export function PropertyCard({ property }: Props) {
   const router = useRouter();
   const unitCount = property.units?.length ?? 0;
+  const label = property.nickname ?? property.address;
 
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => router.push(`/(landlord)/properties/${property.id}` as any)}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}, ${unitCount} ${unitCount === 1 ? 'unit' : 'units'}`}
     >
       <View style={styles.icon}>
         <Building2 size={22} color={colors.brand[600]} />

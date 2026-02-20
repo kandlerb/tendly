@@ -1,0 +1,23 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": { "jsx": true }
+  },
+  "plugins": ["@typescript-eslint", "react-native"],
+  "rules": {
+    "react-native/no-color-literals": "error",
+    "react-native/no-inline-styles": "warn",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    ".expo/",
+    "supabase/",
+    "*.config.js",
+    "babel.config.js",
+    "tailwind.config.js",
+    "eslint.config.js"
+  ]
+}

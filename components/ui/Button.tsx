@@ -7,15 +7,19 @@ interface Props {
   loading?: boolean;
   variant?: 'primary' | 'secondary';
   disabled?: boolean;
+  accessibilityLabel?: string;
 }
 
-export function Button({ title, onPress, loading, variant = 'primary', disabled }: Props) {
+export function Button({ title, onPress, loading, variant = 'primary', disabled, accessibilityLabel }: Props) {
   const isPrimary = variant === 'primary';
   const isInactive = disabled || loading;
   return (
     <TouchableOpacity
       style={[styles.base, isPrimary ? styles.primary : styles.secondary, isInactive && styles.disabled]}
       onPress={isInactive ? undefined : onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityState={{ disabled: !!isInactive }}
     >
       {loading ? (
         <ActivityIndicator color={isPrimary ? colors.white : colors.gray[800]} />
@@ -27,7 +31,7 @@ export function Button({ title, onPress, loading, variant = 'primary', disabled 
 }
 
 const styles = StyleSheet.create({
-  base:          { borderRadius: radius.xl, paddingVertical: 16, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center' },
+  base:          { borderRadius: radius.xl, paddingVertical: 16, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center', minHeight: 48 },
   primary:       { backgroundColor: colors.brand[600] },
   secondary:     { backgroundColor: colors.gray[100], borderWidth: 1, borderColor: colors.gray[200] },
   disabled:      { opacity: 0.5 },
