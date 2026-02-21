@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
 
   answerCard:  { ...cardBase, ...shadow.sm, padding: 24, gap: 16 },
   answerQ:     { fontSize: text.subheading, fontWeight: '700', color: colors.gray[900] },
-  answerText:  { fontSize: text.body, color: colors.gray[600], lineHeight: 24 },
+  answerText:  { fontSize: text.body, color: colors.gray[500], lineHeight: 24 },
   linkBtn:     { backgroundColor: colors.brand[50], borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center', minHeight: 48 },
   linkBtnText: { fontSize: text.body, color: colors.brand[700], fontWeight: '600' },
   ctaBtn:      { backgroundColor: colors.brand[600], borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center', minHeight: 48 },
