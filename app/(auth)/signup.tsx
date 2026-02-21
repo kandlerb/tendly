@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
@@ -21,7 +21,11 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isWide = width >= 768;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const isWide = mounted ? width >= 768 : null;
+
+  if (isWide === null) return null;
 
   async function handleSignup() {
     if (!fullName || !email || !password) return;
