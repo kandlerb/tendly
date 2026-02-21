@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
   // Send invite email via Supabase auth
   const { error: emailError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `tendly://invite?token=${invitation.token}`,
+    redirectTo: `https://kandlerb.github.io/tendly/onboarding?token=${invitation.token}`,
   });
 
   if (emailError) {

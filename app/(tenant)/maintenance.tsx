@@ -4,12 +4,30 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
-import { callTriage } from '../../lib/claude';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { showAlert } from '../../lib/alert';
 import { useAuthStore } from '../../store/auth';
 import { colors, text, radius, headerBase, breakpoints, spacing } from '../../lib/theme';
+
+function triageLocally(title: string, description: string): { urgency: string; trade: string } {
+  const text = (title + ' ' + description).toLowerCase();
+  const emergencyKw = ['flood', 'fire', 'gas leak', 'no heat', 'sewage', 'burst pipe', 'sparks', 'no hot water'];
+  const urgentKw = ['leak', 'mold', 'pest', 'roach', 'rodent', 'broken lock', 'no water'];
+  const urgency = emergencyKw.some(k => text.includes(k)) ? 'emergency'
+                : urgentKw.some(k => text.includes(k)) ? 'urgent'
+                : 'routine';
+  const tradeMap: [RegExp, string][] = [
+    [/plumb|pipe|faucet|toilet|drain/i, 'plumbing'],
+    [/electric|outlet|breaker|wiring/i, 'electrical'],
+    [/hvac|heat|cool|ac|furnace/i, 'hvac'],
+    [/roof|gutter/i, 'roofing'],
+    [/pest|roach|rodent|bug|mice/i, 'pest_control'],
+    [/lock|door(?!bell)|window|key/i, 'locksmith'],
+  ];
+  const trade = tradeMap.find(([re]) => re.test(text))?.[1] ?? 'general';
+  return { urgency, trade };
+}
 
 export default function TenantMaintenanceScreen() {
   const { user } = useAuthStore();
@@ -58,12 +76,7 @@ export default function TenantMaintenanceScreen() {
 
     if (!lease) { showAlert('No active lease found'); setSubmitting(false); return; }
 
-    let urgency = 'routine', trade = 'general';
-    try {
-      const triage = await callTriage(title, description);
-      urgency = triage.urgency;
-      trade = triage.trade;
-    } catch { /* use defaults */ }
+    const { urgency, trade } = triageLocally(title, description);
 
     const photoUrls: string[] = [];
     for (let i = 0; i < photos.length; i++) {

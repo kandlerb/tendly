@@ -10,7 +10,7 @@ const LANDLORD_NAV_ITEMS = [
   { label: 'Tenants',     icon: Users,         route: '/(landlord)/tenants',     segment: 'tenants' },
   { label: 'Maintenance', icon: Wrench,        route: '/(landlord)/maintenance', segment: 'maintenance' },
   { label: 'Messages',    icon: MessageSquare, route: '/(landlord)/messages',    segment: 'messages' },
-  { label: 'Tend AI',     icon: Bot,           route: '/(landlord)/tend',        segment: 'tend' },
+  { label: 'Help',        icon: Bot,           route: '/(landlord)/tend',        segment: 'tend' },
 ] as const;
 
 export default function LandlordLayout() {
