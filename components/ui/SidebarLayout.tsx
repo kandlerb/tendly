@@ -26,7 +26,7 @@ interface SidebarLayoutProps {
 
 export function SidebarLayout({ navItems }: SidebarLayoutProps) {
   const router = useRouter();
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const activeSegment = segments[1];
   const { user, activeView, signOut } = useAuthStore();
 
