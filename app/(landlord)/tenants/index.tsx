@@ -12,6 +12,7 @@ import { inviteTenant } from '../../../lib/claude';
 import { formatCents, formatDate } from '../../../lib/utils';
 import { showAlert } from '../../../lib/alert';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase, breakpoints } from '../../../lib/theme';
+import { ScreenFade } from '../../../components/ui/ScreenFade';
 import type { TenantWithLease, TenantInvitation } from '../../../types';
 
 function daysUntil(dateStr: string) {
@@ -174,6 +175,7 @@ export default function TenantsScreen() {
   );
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={[styles.header, { paddingHorizontal: hPad }]}>
         <Text style={styles.title}>Tenants</Text>
@@ -343,6 +345,7 @@ export default function TenantsScreen() {
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 

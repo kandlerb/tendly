@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { colors, text, radius, shadow, headerBase, cardBase } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 
 type Stage = 'home' | 'questions' | 'answer';
 
@@ -167,6 +168,7 @@ export default function HelpScreen() {
     'Answer';
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         {stage !== 'home' && (
@@ -240,6 +242,7 @@ export default function HelpScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 

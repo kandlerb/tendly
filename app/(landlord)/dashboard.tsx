@@ -7,6 +7,7 @@ import { usePropertiesStore } from '../../store/properties';
 import { useMaintenanceStore } from '../../store/maintenance';
 import { formatCents } from '../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase, breakpoints } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -30,92 +31,94 @@ export default function DashboardScreen() {
   const isLoading = propsLoading || maintLoading;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
-        <Text style={styles.greeting}>Hi, {firstName}</Text>
-        <Text style={styles.sub}>Here's your portfolio today</Text>
-      </View>
-
-      {isLoading ? (
-        <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={colors.brand[600]} />
+    <ScreenFade>
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
+          <Text style={styles.greeting}>Hi, {firstName}</Text>
+          <Text style={styles.sub}>Here's your portfolio today</Text>
         </View>
-      ) : (
-        <ScrollView contentContainerStyle={{ padding: hPad, gap: 8 }}>
-          <View style={[styles.row, { gap, marginBottom: 0 }]}>
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => router.push('/(landlord)/properties' as any)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={`Total units: ${totalUnits}. Go to properties.`}
-            >
-              <Text style={styles.statNum}>{totalUnits}</Text>
-              <Text style={styles.statLabel}>Total units</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => router.push('/(landlord)/financials' as any)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={`Monthly rent: ${formatCents(monthlyRent)}. Go to financials.`}
-            >
-              <Text style={[styles.statNum, { color: colors.brand[600] }]}>{formatCents(monthlyRent)}</Text>
-              <Text style={styles.statLabel}>Monthly rent</Text>
-            </TouchableOpacity>
-          </View>
 
-          <View style={[styles.row, { gap }]}>
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => router.push('/(landlord)/maintenance' as any)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={`Open maintenance requests: ${openRequests}. Go to maintenance.`}
-            >
-              <Text style={styles.statNum}>{openRequests}</Text>
-              <Text style={styles.statLabel}>Open requests</Text>
-            </TouchableOpacity>
-            {emergencies > 0 && (
+        {isLoading ? (
+          <View style={styles.loadingCenter}>
+            <ActivityIndicator size="large" color={colors.brand[600]} />
+          </View>
+        ) : (
+          <ScrollView contentContainerStyle={{ padding: hPad, gap: 8 }}>
+            <View style={[styles.row, { gap, marginBottom: 0 }]}>
               <TouchableOpacity
-                style={[styles.card, { backgroundColor: colors.red[50], borderColor: colors.red[100] }]}
+                style={styles.card}
+                onPress={() => router.push('/(landlord)/properties' as any)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Total units: ${totalUnits}. Go to properties.`}
+              >
+                <Text style={styles.statNum}>{totalUnits}</Text>
+                <Text style={styles.statLabel}>Total units</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => router.push('/(landlord)/financials' as any)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Monthly rent: ${formatCents(monthlyRent)}. Go to financials.`}
+              >
+                <Text style={[styles.statNum, { color: colors.brand[600] }]}>{formatCents(monthlyRent)}</Text>
+                <Text style={styles.statLabel}>Monthly rent</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.row, { gap }]}>
+              <TouchableOpacity
+                style={styles.card}
                 onPress={() => router.push('/(landlord)/maintenance' as any)}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel={`${emergencies} emergency maintenance requests. Go to maintenance.`}
+                accessibilityLabel={`Open maintenance requests: ${openRequests}. Go to maintenance.`}
               >
-                <Text style={[styles.statNum, { color: colors.red[600] }]}>{emergencies}</Text>
-                <Text style={[styles.statLabel, { color: colors.red[500] }]}>Emergencies</Text>
+                <Text style={styles.statNum}>{openRequests}</Text>
+                <Text style={styles.statLabel}>Open requests</Text>
               </TouchableOpacity>
-            )}
-          </View>
-
-          <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Your properties</Text>
-
-          <View style={isWide ? [styles.grid, { gap }] : undefined}>
-            {properties.map((p) => (
-              <TouchableOpacity
-                key={p.id}
-                style={[styles.propCard, isWide && { width: colW }]}
-                onPress={() => router.push(`/(landlord)/properties/${p.id}` as any)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={`Property: ${p.nickname ?? p.address}, ${p.units?.length ?? 0} units`}
-              >
-                <Text style={styles.propName}>{p.nickname ?? p.address}</Text>
-                <Text style={styles.propSub}>{p.units?.length ?? 0} units</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {properties.length === 0 && (
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>Add your first property to get started</Text>
+              {emergencies > 0 && (
+                <TouchableOpacity
+                  style={[styles.card, { backgroundColor: colors.red[50], borderColor: colors.red[100] }]}
+                  onPress={() => router.push('/(landlord)/maintenance' as any)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${emergencies} emergency maintenance requests. Go to maintenance.`}
+                >
+                  <Text style={[styles.statNum, { color: colors.red[600] }]}>{emergencies}</Text>
+                  <Text style={[styles.statLabel, { color: colors.red[500] }]}>Emergencies</Text>
+                </TouchableOpacity>
+              )}
             </View>
-          )}
-        </ScrollView>
-      )}
-    </SafeAreaView>
+
+            <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Your properties</Text>
+
+            <View style={isWide ? [styles.grid, { gap }] : undefined}>
+              {properties.map((p) => (
+                <TouchableOpacity
+                  key={p.id}
+                  style={[styles.propCard, isWide && { width: colW }]}
+                  onPress={() => router.push(`/(landlord)/properties/${p.id}` as any)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Property: ${p.nickname ?? p.address}, ${p.units?.length ?? 0} units`}
+                >
+                  <Text style={styles.propName}>{p.nickname ?? p.address}</Text>
+                  <Text style={styles.propSub}>{p.units?.length ?? 0} units</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {properties.length === 0 && (
+              <View style={styles.empty}>
+                <Text style={styles.emptyText}>Add your first property to get started</Text>
+              </View>
+            )}
+          </ScrollView>
+        )}
+      </SafeAreaView>
+    </ScreenFade>
   );
 }
 

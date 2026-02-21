@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { usePropertiesStore } from '../../../store/properties';
 import { formatCents } from '../../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../../lib/theme';
+import { ScreenFade } from '../../../components/ui/ScreenFade';
 
 export default function FinancialsScreen() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function FinancialsScreen() {
   const colW = isWide ? (width - 220 - hPad * 2 - gap) / 2 : undefined;
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
         <Text style={styles.pageTitle}>Financials</Text>
@@ -86,6 +88,7 @@ export default function FinancialsScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 

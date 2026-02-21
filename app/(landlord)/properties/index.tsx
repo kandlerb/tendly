@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react-native';
 import { usePropertiesStore } from '../../../store/properties';
 import { PropertyCard } from '../../../components/domain/PropertyCard';
 import { colors, text, radius, headerBase, breakpoints, spacing } from '../../../lib/theme';
+import { ScreenFade } from '../../../components/ui/ScreenFade';
 
 export default function PropertiesScreen() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function PropertiesScreen() {
   const colW = isWide ? (width - 220 - hPad * 2 - gap) / 2 : undefined;
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={[styles.header, { paddingHorizontal: hPad }]}>
         <Text style={styles.title}>Properties</Text>
@@ -64,6 +66,7 @@ export default function PropertiesScreen() {
         />
       )}
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 

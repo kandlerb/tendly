@@ -6,6 +6,7 @@ import { useMaintenanceStore } from '../../../store/maintenance';
 import { UrgencyBadge, StatusBadge } from '../../../components/domain/MaintenanceBadge';
 import { formatDate } from '../../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../../lib/theme';
+import { ScreenFade } from '../../../components/ui/ScreenFade';
 
 export default function MaintenanceScreen() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function MaintenanceScreen() {
   const colW = isWide ? (width - 220 - hPad * 2 - gap) / 2 : undefined;
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={[styles.header, { paddingHorizontal: hPad }]}>
         <Text style={styles.title}>Maintenance</Text>
@@ -60,6 +62,7 @@ export default function MaintenanceScreen() {
         ) : null}
       />
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 

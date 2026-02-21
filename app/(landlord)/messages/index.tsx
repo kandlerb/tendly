@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { MessageSquare } from 'lucide-react-native';
 import { useMessagesStore } from '../../../store/messages';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../../lib/theme';
+import { ScreenFade } from '../../../components/ui/ScreenFade';
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function MessagesScreen() {
   const colW = isWide ? (width - 220 - hPad * 2 - gap) / 2 : undefined;
 
   return (
+    <ScreenFade>
     <SafeAreaView style={styles.safe}>
       <View style={[styles.header, { paddingHorizontal: hPad }]}>
         <Text style={styles.title}>Messages</Text>
@@ -64,6 +66,7 @@ export default function MessagesScreen() {
         ) : null}
       />
     </SafeAreaView>
+    </ScreenFade>
   );
 }
 
