@@ -13,6 +13,7 @@ import { getSignedUrl, acknowledgeDocument } from '../../lib/claude';
 import { showAlert } from '../../lib/alert';
 import { formatDate } from '../../lib/utils';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase, breakpoints } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 import type { Document, DocumentType } from '../../types';
 
 const DOC_TYPE_LABELS: Record<DocumentType, string> = {
@@ -228,12 +229,13 @@ export default function TenantDocumentsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
-        <Text style={styles.pageTitle}>Documents</Text>
-      </View>
+    <ScreenFade>
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
+          <Text style={styles.pageTitle}>Documents</Text>
+        </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: hPad, paddingVertical: 16, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: hPad, paddingVertical: 16, paddingBottom: 40 }}>
         {loading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.brand[600]} />
@@ -297,8 +299,9 @@ export default function TenantDocumentsScreen() {
             </View>
           );
         })}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenFade>
   );
 }
 

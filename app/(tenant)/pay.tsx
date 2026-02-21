@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth';
 import { formatCents, formatDate } from '../../lib/utils';
 import { Button } from '../../components/ui/Button';
 import { colors, text, radius, shadow, spacing, cardBase, headerBase } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 import type { RentPayment } from '../../types';
 
 export default function TenantPayScreen() {
@@ -44,50 +45,52 @@ export default function TenantPayScreen() {
   const colW = isWide ? (width - hPad * 2 - gap) / 2 : undefined;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
-        <Text style={styles.pageTitle}>Pay Rent</Text>
-      </View>
-      <ScrollView contentContainerStyle={{ padding: hPad, gap }}>
-        {pending.length > 0 && (
-          <View style={styles.pendingCard}>
-            <Text style={styles.pendingDue}>Due {formatDate(pending[0].due_date)}</Text>
-            <Text style={styles.pendingAmount}>{formatCents(pending[0].amount)}</Text>
-            <Button title="Pay Now" onPress={() => {}} />
-          </View>
-        )}
-
-        <Text style={styles.sectionTitle}>Payment history</Text>
-
-        <View style={isWide ? [styles.grid, { gap }] : undefined}>
-          {payments.map((p) => (
-            <View key={p.id} style={[styles.payRow, isWide && { width: colW }]}>
-              <View>
-                <Text style={styles.payAmount}>{formatCents(p.amount)}</Text>
-                <Text style={styles.payDate}>{formatDate(p.due_date)}</Text>
-              </View>
-              <View style={[
-                styles.badge,
-                p.status === 'paid' ? styles.badgePaid :
-                p.status === 'late' ? styles.badgeLate : styles.badgePending,
-              ]}>
-                <Text style={[
-                  styles.badgeText,
-                  p.status === 'paid' ? styles.badgeTextPaid :
-                  p.status === 'late' ? styles.badgeTextLate : styles.badgeTextPending,
-                ]}>{p.status}</Text>
-              </View>
-            </View>
-          ))}
+    <ScreenFade>
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
+          <Text style={styles.pageTitle}>Pay Rent</Text>
         </View>
+        <ScrollView contentContainerStyle={{ padding: hPad, gap }}>
+          {pending.length > 0 && (
+            <View style={styles.pendingCard}>
+              <Text style={styles.pendingDue}>Due {formatDate(pending[0].due_date)}</Text>
+              <Text style={styles.pendingAmount}>{formatCents(pending[0].amount)}</Text>
+              <Button title="Pay Now" onPress={() => {}} />
+            </View>
+          )}
 
-        {!loading && payments.length === 0 && (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>No payment records yet</Text>
+          <Text style={styles.sectionTitle}>Payment history</Text>
+
+          <View style={isWide ? [styles.grid, { gap }] : undefined}>
+            {payments.map((p) => (
+              <View key={p.id} style={[styles.payRow, isWide && { width: colW }]}>
+                <View>
+                  <Text style={styles.payAmount}>{formatCents(p.amount)}</Text>
+                  <Text style={styles.payDate}>{formatDate(p.due_date)}</Text>
+                </View>
+                <View style={[
+                  styles.badge,
+                  p.status === 'paid' ? styles.badgePaid :
+                  p.status === 'late' ? styles.badgeLate : styles.badgePending,
+                ]}>
+                  <Text style={[
+                    styles.badgeText,
+                    p.status === 'paid' ? styles.badgeTextPaid :
+                    p.status === 'late' ? styles.badgeTextLate : styles.badgeTextPending,
+                  ]}>{p.status}</Text>
+                </View>
+              </View>
+            ))}
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+
+          {!loading && payments.length === 0 && (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>No payment records yet</Text>
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenFade>
   );
 }
 

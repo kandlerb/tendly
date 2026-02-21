@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { useMessagesStore } from '../../store/messages';
 import { useAuthStore } from '../../store/auth';
 import { colors, text, radius, shadow, headerBase } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 
 export default function TenantMessagesScreen() {
   const { user } = useAuthStore();
@@ -58,53 +59,55 @@ export default function TenantMessagesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
-      </View>
-
-      <KeyboardView style={styles.flex}>
-        <View style={isWide ? styles.chatContainerWide : styles.flex}>
-          <FlatList
-            ref={listRef}
-            data={threadMessages}
-            keyExtractor={(m) => m.id}
-            contentContainerStyle={styles.messageList}
-            ListEmptyComponent={
-              <View style={styles.empty}>
-                <Text style={styles.emptyText}>No messages yet</Text>
-              </View>
-            }
-            renderItem={({ item }) => {
-              const isMe = item.sender_id === user?.id;
-              return (
-                <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
-                  <View style={[styles.bubbleInner, isMe ? styles.bubbleInnerMe : styles.bubbleInnerThem]}>
-                    <Text style={isMe ? styles.bubbleTextMe : styles.bubbleTextThem}>{item.body}</Text>
-                  </View>
-                </View>
-              );
-            }}
-          />
-
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Message your landlord..."
-              value={body}
-              onChangeText={setBody}
-              multiline
-            />
-            <TouchableOpacity
-              style={[styles.sendBtn, (!body.trim() || sending) && styles.sendBtnDisabled]}
-              onPress={handleSend}
-            >
-              <Send size={18} color="white" />
-            </TouchableOpacity>
-          </View>
+    <ScreenFade>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Messages</Text>
         </View>
-      </KeyboardView>
-    </SafeAreaView>
+
+        <KeyboardView style={styles.flex}>
+          <View style={isWide ? styles.chatContainerWide : styles.flex}>
+            <FlatList
+              ref={listRef}
+              data={threadMessages}
+              keyExtractor={(m) => m.id}
+              contentContainerStyle={styles.messageList}
+              ListEmptyComponent={
+                <View style={styles.empty}>
+                  <Text style={styles.emptyText}>No messages yet</Text>
+                </View>
+              }
+              renderItem={({ item }) => {
+                const isMe = item.sender_id === user?.id;
+                return (
+                  <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+                    <View style={[styles.bubbleInner, isMe ? styles.bubbleInnerMe : styles.bubbleInnerThem]}>
+                      <Text style={isMe ? styles.bubbleTextMe : styles.bubbleTextThem}>{item.body}</Text>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="Message your landlord..."
+                value={body}
+                onChangeText={setBody}
+                multiline
+              />
+              <TouchableOpacity
+                style={[styles.sendBtn, (!body.trim() || sending) && styles.sendBtnDisabled]}
+                onPress={handleSend}
+              >
+                <Send size={18} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardView>
+      </SafeAreaView>
+    </ScreenFade>
   );
 }
 

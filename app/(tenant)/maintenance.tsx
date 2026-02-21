@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { showAlert } from '../../lib/alert';
 import { useAuthStore } from '../../store/auth';
 import { colors, text, radius, headerBase, breakpoints, spacing } from '../../lib/theme';
+import { ScreenFade } from '../../components/ui/ScreenFade';
 
 function triageLocally(title: string, description: string): { urgency: string; trade: string } {
   const text = (title + ' ' + description).toLowerCase();
@@ -112,44 +113,46 @@ export default function TenantMaintenanceScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
-        <Text style={styles.pageTitle}>Submit Request</Text>
-      </View>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          { paddingHorizontal: hPad, paddingTop: hPad },
-          isWide && styles.contentWide,
-        ]}
-      >
-        <View style={isWide ? styles.formWide : undefined}>
-          <Input label="What's the issue?" value={title} onChangeText={setTitle} placeholder="Leaking faucet" />
-          <Input label="Describe the problem" value={description} onChangeText={setDescription} multiline placeholder="The kitchen faucet has been dripping constantly for 2 days..." />
-
-          <TouchableOpacity
-            style={styles.photoBtn}
-            onPress={pickPhoto}
-            accessibilityRole="button"
-            accessibilityLabel="Add photos"
-          >
-            <Camera size={24} color={colors.gray[400]} />
-            <Text style={styles.photoBtnText}>Add photos</Text>
-          </TouchableOpacity>
-
-          {photos.length > 0 && (
-            <View style={styles.photoRow}>
-              {photos.map((uri, i) => (
-                <Image key={i} source={{ uri }} style={styles.photoThumb} />
-              ))}
-            </View>
-          )}
-
-          <Button title="Submit Request" onPress={handleSubmit} loading={submitting} />
+    <ScreenFade>
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.pageHeader, { paddingHorizontal: hPad }]}>
+          <Text style={styles.pageTitle}>Submit Request</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.content,
+            { paddingHorizontal: hPad, paddingTop: hPad },
+            isWide && styles.contentWide,
+          ]}
+        >
+          <View style={isWide ? styles.formWide : undefined}>
+            <Input label="What's the issue?" value={title} onChangeText={setTitle} placeholder="Leaking faucet" />
+            <Input label="Describe the problem" value={description} onChangeText={setDescription} multiline placeholder="The kitchen faucet has been dripping constantly for 2 days..." />
+
+            <TouchableOpacity
+              style={styles.photoBtn}
+              onPress={pickPhoto}
+              accessibilityRole="button"
+              accessibilityLabel="Add photos"
+            >
+              <Camera size={24} color={colors.gray[400]} />
+              <Text style={styles.photoBtnText}>Add photos</Text>
+            </TouchableOpacity>
+
+            {photos.length > 0 && (
+              <View style={styles.photoRow}>
+                {photos.map((uri, i) => (
+                  <Image key={i} source={{ uri }} style={styles.photoThumb} />
+                ))}
+              </View>
+            )}
+
+            <Button title="Submit Request" onPress={handleSubmit} loading={submitting} />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenFade>
   );
 }
 
