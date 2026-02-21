@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useWindowDimensions, TouchableOpacity } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
 import { Home, Building2, Users, Wrench, MessageSquare, Bot, User } from 'lucide-react-native';
@@ -16,8 +17,10 @@ const LANDLORD_NAV_ITEMS = [
 export default function LandlordLayout() {
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  if (width >= breakpoints.md) return <SidebarLayout navItems={LANDLORD_NAV_ITEMS} />;
+  if (mounted && width >= breakpoints.md) return <SidebarLayout navItems={LANDLORD_NAV_ITEMS} />;
 
   return (
     <Tabs
