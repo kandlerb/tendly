@@ -1,6 +1,6 @@
 import { useWindowDimensions, TouchableOpacity } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { CreditCard, Wrench, MessageSquare, FileText, User } from 'lucide-react-native';
+import { CreditCard, Wrench, MessageSquare, FileText, HelpCircle, User } from 'lucide-react-native';
 import { SidebarLayout } from '../../components/ui/SidebarLayout';
 import { breakpoints, colors } from '../../lib/theme';
 
@@ -9,6 +9,7 @@ const TENANT_NAV_ITEMS = [
   { label: 'Requests',   icon: Wrench,        route: '/(tenant)/maintenance', segment: 'maintenance' },
   { label: 'Messages',   icon: MessageSquare, route: '/(tenant)/messages',    segment: 'messages' },
   { label: 'Documents',  icon: FileText,      route: '/(tenant)/documents',   segment: 'documents' },
+  { label: 'Help',       icon: HelpCircle,    route: '/(tenant)/help',        segment: 'help' },
 ] as const;
 
 export default function TenantLayout() {
@@ -23,6 +24,7 @@ export default function TenantLayout() {
       <Tabs.Screen name="maintenance" options={{ title: 'Requests', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
       <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
       <Tabs.Screen name="documents" options={{ title: 'Documents', tabBarIcon: ({ color }) => <FileText size={22} color={color} /> }} />
+      <Tabs.Screen name="help" options={{ title: 'Help', tabBarIcon: ({ color }) => <HelpCircle size={22} color={color} /> }} />
       <Tabs.Screen name="onboarding" options={{ href: null }} />
 
       {/* Profile tab — intercepts tap and opens the /profile modal */}
