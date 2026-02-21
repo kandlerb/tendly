@@ -29,21 +29,14 @@ export default function LandlordLayout() {
       }}
     >
       <Tabs.Screen name="dashboard" options={{ title: 'Home', tabBarIcon: ({ color }) => <Home size={22} color={color} /> }} />
-      <Tabs.Screen name="properties/index" options={{ title: 'Properties', tabBarIcon: ({ color }) => <Building2 size={22} color={color} /> }} />
-      <Tabs.Screen name="tenants/index" options={{ title: 'Tenants', tabBarIcon: ({ color }) => <Users size={22} color={color} /> }} />
-      <Tabs.Screen name="maintenance/index" options={{ title: 'Maintenance', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
-      <Tabs.Screen name="messages/index" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
+      <Tabs.Screen name="properties" options={{ title: 'Properties', tabBarIcon: ({ color }) => <Building2 size={22} color={color} /> }} />
+      <Tabs.Screen name="tenants" options={{ title: 'Tenants', tabBarIcon: ({ color }) => <Users size={22} color={color} /> }} />
+      <Tabs.Screen name="maintenance" options={{ title: 'Maintenance', tabBarIcon: ({ color }) => <Wrench size={22} color={color} /> }} />
+      <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} /> }} />
 
       {/* Tend AI hidden from mobile tab bar — accessible via sidebar on desktop */}
       <Tabs.Screen name="tend" options={{ href: null }} />
-      <Tabs.Screen name="financials/index" options={{ href: null }} />
-
-      {/* Hide sub-routes from tab bar */}
-      <Tabs.Screen name="properties/add" options={{ href: null }} />
-      <Tabs.Screen name="properties/[id]/index" options={{ href: null }} />
-      <Tabs.Screen name="tenants/[tenantId]" options={{ href: null }} />
-      <Tabs.Screen name="maintenance/[id]" options={{ href: null }} />
-      <Tabs.Screen name="messages/[threadId]" options={{ href: null }} />
+      <Tabs.Screen name="financials" options={{ href: null }} />
 
       {/* Profile tab — intercepts tap and opens the /profile modal */}
       <Tabs.Screen
