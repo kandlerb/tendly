@@ -39,7 +39,7 @@ export default function LandlordLayout() {
 
       {/* Tend AI hidden from mobile tab bar — accessible via sidebar on desktop */}
       <Tabs.Screen name="tend" options={{ href: null }} />
-      <Tabs.Screen name="financials" options={{ href: null }} />
+      <Tabs.Screen name="financials/index" options={{ href: null }} />
 
       {/* Profile tab — intercepts tap and opens the /profile modal */}
       <Tabs.Screen
