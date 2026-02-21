@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useWindowDimensions, TouchableOpacity } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
 import { CreditCard, Wrench, MessageSquare, FileText, HelpCircle, User } from 'lucide-react-native';
@@ -16,10 +15,7 @@ const TENANT_NAV_ITEMS = [
 export default function TenantLayout() {
   const { width } = useWindowDimensions();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
-  if (mounted && width >= breakpoints.md) return <SidebarLayout navItems={TENANT_NAV_ITEMS} />;
+  if (width >= breakpoints.md) return <SidebarLayout navItems={TENANT_NAV_ITEMS} />;
 
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand[600] }}>
